@@ -54,7 +54,7 @@ export const site = {
   locale: 'he_IL',
   /** Demo mode: noindex on every page, X-Robots-Tag header, and a demo note in the footer. */
   isDemo: true,
-  demoNote: 'אתר הדגמה לתיק עבודות. העסק, האנשים, המחירים וההמלצות בדויים.',
+  demoNote: 'אתר הדגמה לתיק עבודות. העסק, האנשים, הטלפון, המחירים וההמלצות בדויים, ואי אפשר להזמין דרכו פרחים.',
   foundedYear: 2014,
   updated: '2026-09-28',
 };

@@ -11,6 +11,7 @@ import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import MobileBar from '../components/MobileBar.astro';
 import CookieConsent from '../components/CookieConsent.astro';
+import DemoBanner from '../components/DemoBanner.astro';
 import { site, theme, contact, owner, social, images, services, areas, stats, analytics, hours } from '../config/site.config';
 import { getImage } from 'astro:assets';
 
@@ -118,6 +119,7 @@ const allSchema = [businessSchema, ...schema];
   </head>
   <body>
     <a class="skip-link" href="#main">דלגו לתוכן הראשי</a>
+    <DemoBanner />
     <Header />
     <main id="main">
       <slot />
