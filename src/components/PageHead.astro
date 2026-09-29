@@ -1,0 +1,39 @@
+---
+import { Picture } from 'astro:assets';
+import Breadcrumbs from './Breadcrumbs.astro';
+import type { Crumb } from '../lib/schema';
+interface Props {
+  crumbs: Crumb[];
+  title: string;
+  lead?: string;
+  image?: ImageMetadata;
+  imageAlt?: string;
+}
+const { crumbs, title, lead, image, imageAlt = '' } = Astro.props;
+---
+<section class:list={['page-head', { 'has-image': image }]}>
+  <div class="wrap grid">
+    <div class="text">
+      <Breadcrumbs crumbs={crumbs} />
+      <h1>{title}</h1>
+      {lead && <p class="lead">{lead}</p>}
+      <slot />
+    </div>
+    {image && (
+      <Picture class="photo" src={image} alt={imageAlt} widths={[480, 720, 960]} sizes="(min-width: 900px) 40vw, 100vw" formats={['avif', 'webp']} loading="eager" fetchpriority="high" />
+    )}
+  </div>
+</section>
+
+<style>
+  .page-head { padding-block: var(--space-6) var(--space-8); border-bottom: 1px solid var(--c-line); }
+  .grid { display: grid; gap: var(--space-6); align-items: end; }
+  .text { display: grid; gap: var(--space-4); justify-items: start; }
+  h1 { margin-top: var(--space-4); }
+  .lead { max-width: 38rem; }
+  .grid :global(.photo) { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; }
+  @media (min-width: 900px) {
+    .has-image .grid { grid-template-columns: 1.25fr 1fr; gap: var(--space-8); }
+    .grid :global(.photo) { aspect-ratio: 4 / 5; max-height: 32rem; }
+  }
+</style>

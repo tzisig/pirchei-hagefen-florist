@@ -1,0 +1,147 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHead from '../components/PageHead.astro';
+import FaqList from '../components/FaqList.astro';
+import CtaBand from '../components/CtaBand.astro';
+import { areas, hours, deliveryRules, faq, images } from '../config/site.config';
+import { breadcrumbSchema, faqSchema, home } from '../lib/schema';
+import { price } from '../lib/util';
+
+const crumbs = [home, { label: 'משלוחים', href: '/delivery/' }];
+const deliveryFaq = faq.filter((f) => /משלוח|בית חולים|לבטל|מחוץ/.test(f.q));
+---
+<BaseLayout
+  title="משלוח פרחים בירושלים: מחירים, שעות והזמנה לאותו יום"
+  description="עד מתי אפשר להזמין משלוח פרחים לאותו יום בירושלים, כמה עולה משלוח לכל שכונה, ומה חשוב לדעת על משלוח לבית חולים ובערבי חג."
+  schema={[breadcrumbSchema(crumbs), faqSchema(deliveryFaq)]}
+>
+  <PageHead crumbs={crumbs} title="משלוחים" lead={deliveryRules.sameDayNote} image={images.delivery} imageAlt={images.deliveryAlt} />
+
+  <section class="section">
+    <div class="wrap checker-grid">
+      <div>
+        <h2>יגיע היום?</h2>
+        <p class="lead">בחרו שכונה ויום, ונגיד לכם כמה זה עולה ועד מתי אפשר להזמין.</p>
+      </div>
+      <form class="checker" data-checker data-hours={JSON.stringify(hours)} data-areas={JSON.stringify(areas.map(({ slug, name, fee, window }) => ({ slug, name, fee, window })))} data-tz={deliveryRules.timeZone}>
+        <div class="field">
+          <label for="c-area">שכונה</label>
+          <select id="c-area" name="area">
+            {areas.map((a) => <option value={a.slug}>{a.name}</option>)}
+          </select>
+        </div>
+        <div class="field">
+          <label for="c-day">מתי</label>
+          <select id="c-day" name="day">
+            <option value="0">היום</option>
+            <option value="1">מחר</option>
+            <option value="2">מחרתיים</option>
+          </select>
+        </div>
+        <output class="result" for="c-area c-day" aria-live="polite" data-result>
+          בחרו שכונה ויום כדי לראות את הפרטים.
+        </output>
+      </form>
+    </div>
+  </section>
+
+  <section class="section section--blush">
+    <div class="wrap tables">
+      <div>
+        <h2 class="h">מחיר לפי שכונה</h2>
+        <table>
+          <caption class="visually-hidden">דמי משלוח וזמני הגעה</caption>
+          <thead><tr><th scope="col">שכונה</th><th scope="col">דמי משלוח</th><th scope="col">זמן הגעה</th></tr></thead>
+          <tbody>
+            {areas.map((a) => <tr><th scope="row"><a href={`/areas/${a.slug}/`}>{a.name}</a></th><td>{a.fee ? price(a.fee) : 'חינם'}</td><td>{a.window}</td></tr>)}
+            <tr><th scope="row">איסוף עצמי</th><td>חינם</td><td>בשעות הפתיחה</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div>
+        <h2 class="h">שעות ומועדים</h2>
+        <table>
+          <caption class="visually-hidden">שעות פתיחה והזמנה אחרונה למשלוח באותו יום</caption>
+          <thead><tr><th scope="col">יום</th><th scope="col">החנות פתוחה</th><th scope="col">הזמנה להיום עד</th></tr></thead>
+          <tbody>
+            {hours.map((h) => <tr><th scope="row">{h.label}</th><td dir="ltr">{h.opens ? `${h.opens}-${h.closes}` : 'סגור'}</td><td dir="ltr">{h.cutoff || '-'}</td></tr>)}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap notes">
+      <article><h2>בית חולים</h2><p>{deliveryRules.hospitalNote}</p></article>
+      <article><h2>ערבי חג</h2><p>{deliveryRules.holidayNote}</p></article>
+      <article><h2>איסוף עצמי</h2><p>{deliveryRules.pickupNote}</p></article>
+    </div>
+  </section>
+
+  <section class="section section--blush">
+    <div class="wrap faq-grid">
+      <h2>שאלות על משלוחים</h2>
+      <FaqList items={deliveryFaq} />
+    </div>
+  </section>
+
+  <CtaBand />
+</BaseLayout>
+
+<style>
+  .checker-grid { display: grid; gap: var(--space-6); }
+  @media (min-width: 900px) { .checker-grid { grid-template-columns: 1fr 1.2fr; gap: var(--space-8); align-items: start; } }
+  .checker-grid h2 { margin-bottom: var(--space-4); }
+  .checker { display: grid; gap: var(--space-4); padding: var(--space-6); background: #fff; border: 1px solid var(--c-line); }
+  @media (min-width: 560px) { .checker { grid-template-columns: 1fr 1fr; } .result { grid-column: 1 / -1; } }
+  .result { display: block; padding: var(--space-4) var(--space-5); background: var(--c-blush); border-inline-start: 3px solid var(--c-vine); font-size: 1.1rem; line-height: 1.6; }
+  .result :global(strong) { color: var(--c-grape); font-weight: 600; }
+  .tables { display: grid; gap: var(--space-7); }
+  @media (min-width: 900px) { .tables { grid-template-columns: 1fr 1fr; gap: var(--space-8); } }
+  .h { font-size: var(--step-3); margin-bottom: var(--space-5); }
+  table { width: 100%; border-collapse: collapse; font-family: var(--font-sans); }
+  th, td { text-align: start; padding: 0.7rem 0; padding-inline-end: var(--space-4); border-bottom: 1px solid var(--c-line); font-weight: 400; }
+  thead th { font-size: 0.85rem; color: var(--c-muted); }
+  tbody th { font-family: var(--font-serif); font-size: 1.15rem; color: var(--c-grape); }
+  .notes { display: grid; gap: var(--space-6); }
+  @media (min-width: 900px) { .notes { grid-template-columns: repeat(3, 1fr); } }
+  .notes article { border-top: 1px solid var(--c-grape); padding-top: var(--space-4); }
+  .notes h2 { font-size: var(--step-2); margin-bottom: var(--space-3); }
+  .faq-grid { display: grid; gap: var(--space-6); }
+  @media (min-width: 900px) { .faq-grid { grid-template-columns: 1fr 2fr; gap: var(--space-8); } }
+</style>
+
+<script>
+  type Day = { day: number; label: string; opens: string; closes: string; cutoff: string };
+  type Area = { slug: string; name: string; fee: number; window: string };
+  const form = document.querySelector<HTMLFormElement>('[data-checker]')!;
+  const days: Day[] = JSON.parse(form.dataset.hours!);
+  const areas: Area[] = JSON.parse(form.dataset.areas!);
+  const out = form.querySelector<HTMLElement>('[data-result]')!;
+  const toMin = (t: string) => { const [h, m] = t.split(':').map(Number); return h * 60 + m; };
+
+  const parts = new Intl.DateTimeFormat('en-GB', { timeZone: form.dataset.tz, weekday: 'short', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).formatToParts(new Date());
+  const get = (t: string) => parts.find((p) => p.type === t)?.value || '';
+  const today = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].indexOf(get('weekday'));
+  const now = Number(get('hour')) * 60 + Number(get('minute'));
+
+  const esc = (s: string) => s.replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c]!);
+  const render = () => {
+    const area = areas.find((a) => a.slug === (form.elements.namedItem('area') as HTMLSelectElement).value)!;
+    const offset = Number((form.elements.namedItem('day') as HTMLSelectElement).value);
+    const d = days.find((x) => x.day === (today + offset) % 7)!;
+    const fee = area.fee ? `${area.fee} ₪` : 'חינם';
+    if (!d.cutoff) {
+      out.innerHTML = `ביום ${esc(d.label)} החנות סגורה ואין משלוחים. אפשר להזמין מראש ליום ראשון.`;
+      return;
+    }
+    if (offset === 0 && now >= toMin(d.cutoff)) {
+      out.innerHTML = `ההזמנות למשלוח היום נסגרו ב-<bdi>${d.cutoff}</bdi>. הזמנה עכשיו תצא ביום העבודה הבא. משלוח ל${esc(area.name)}: <strong>${fee}</strong>.`;
+      return;
+    }
+    out.innerHTML = `משלוח ל${esc(area.name)}: <strong>${fee}</strong>, ${esc(area.window)}. הזמינו עד <strong><bdi>${d.cutoff}</bdi></strong> ביום ${esc(d.label)}.`;
+  };
+  form.addEventListener('change', render);
+  render();
+</script>

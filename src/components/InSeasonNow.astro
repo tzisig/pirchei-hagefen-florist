@@ -1,0 +1,35 @@
+---
+// "Blooming this month" list. Rendered for the build month and corrected in the browser.
+import { flowers } from '../config/site.config';
+import { monthNames, buildMonth } from '../lib/util';
+const month = buildMonth();
+---
+<div class="now" data-in-season>
+  <p class="label">פורח אצלנו ב<span data-month-name>{monthNames[month - 1]}</span></p>
+  <ul>
+    {flowers.map((f) => (
+      <li data-months={f.months.join(',')} hidden={!f.months.includes(month)}>
+        <a href={`/seasons/#f-${f.id}`}>{f.name}</a>
+      </li>
+    ))}
+  </ul>
+</div>
+
+<style>
+  ul { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: var(--space-3); }
+  a { display: inline-flex; align-items: center; min-height: 40px; padding: 0.3rem 0.95rem; border: 1px solid currentColor; border-radius: var(--radius-l); text-decoration: none; font-size: 1.05rem; }
+  a:hover { background: var(--c-vine); border-color: var(--c-vine); color: #fff; }
+  :global(.on-dark) .now a:hover { background: var(--c-tendril); border-color: var(--c-tendril); color: var(--c-grape-deep); }
+  :global(.on-dark) .now .label { color: #d8c9d7; }
+</style>
+
+<script>
+  const names = ['ינואר', 'פברואר', 'מרץ', 'אפריל', 'מאי', 'יוני', 'יולי', 'אוגוסט', 'ספטמבר', 'אוקטובר', 'נובמבר', 'דצמבר'];
+  const month = Number(new Intl.DateTimeFormat('en', { timeZone: 'Asia/Jerusalem', month: 'numeric' }).format(new Date()));
+  document.querySelectorAll<HTMLElement>('[data-in-season]').forEach((box) => {
+    box.querySelector('[data-month-name]')!.textContent = names[month - 1];
+    box.querySelectorAll<HTMLElement>('[data-months]').forEach((li) => {
+      li.hidden = !li.dataset.months!.split(',').map(Number).includes(month);
+    });
+  });
+</script>

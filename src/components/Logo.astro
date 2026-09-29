@@ -1,0 +1,19 @@
+---
+import { site } from '../config/site.config';
+interface Props { tone?: 'dark' | 'light' }
+const { tone = 'dark' } = Astro.props;
+---
+<a href="/" class:list={['logo', tone]} aria-label={`${site.name}, לדף הבית`}>
+  <svg class="mark" viewBox="0 0 48 48" width="38" height="38" aria-hidden="true" focusable="false">
+    <path d="M24 44V26c0-7 4-12 11-13" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+    <path d="M35 13c4-1 6 2 5 5s-5 3-6 0 2-4 3-2" fill="none" stroke="var(--c-tendril-mark)" stroke-width="2.4" stroke-linecap="round"/>
+    <path d="M24 30c-6 0-11-4-12-11 6 0 11 4 12 11z" fill="currentColor"/>
+  </svg>
+  <span class="word">{site.name}</span>
+</a>
+
+<style>
+  .logo { display: inline-flex; align-items: center; gap: 0.5rem; text-decoration: none; color: var(--c-grape); --c-tendril-mark: var(--c-vine); }
+  .logo.light { color: #fff; --c-tendril-mark: var(--c-tendril); }
+  .word { font-family: var(--font-serif); font-size: 1.6rem; font-weight: 500; line-height: 1; letter-spacing: -0.01em; }
+</style>

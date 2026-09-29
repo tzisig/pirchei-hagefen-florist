@@ -1,0 +1,84 @@
+---
+import { Picture } from 'astro:assets';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHead from '../components/PageHead.astro';
+import CtaBand from '../components/CtaBand.astro';
+import { owner, site, stats, images } from '../config/site.config';
+import { breadcrumbSchema, businessRef, home } from '../lib/schema';
+
+const crumbs = [home, { label: 'אודות', href: '/about/' }];
+const years = new Date().getFullYear() - site.foundedYear;
+const person = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: owner.name,
+  jobTitle: owner.role,
+  worksFor: businessRef,
+  alumniOf: 'בצלאל',
+};
+---
+<BaseLayout
+  title={`אודות ${owner.name} ופרחי הגפן`}
+  description={`${owner.name} מעצבת פרחים בירושלים משנת ${site.foundedYear}. איך נולד פרחי הגפן, למה אנחנו קונים ישר מהמגדלים, ומי עומד מאחורי כל זר.`}
+  schema={[breadcrumbSchema(crumbs), person]}
+>
+  <PageHead crumbs={crumbs} title="פרחי הגפן" lead={owner.short} image={owner.image} imageAlt={owner.imageAlt} />
+
+  <section class="section">
+    <div class="wrap story">
+      <div class="prose">
+        {owner.story.map((p) => <p>{p}</p>)}
+      </div>
+      <dl class="numbers">
+        <div><dt>שנים בירושלים</dt><dd>{years}</dd></div>
+        <div><dt>זרים בשנה</dt><dd>{stats.bouquetsPerYear.toLocaleString('he-IL')}</dd></div>
+        <div><dt>חתונות בשנה</dt><dd>{stats.weddingsPerYear}</dd></div>
+        <div><dt>מגדלים שאנחנו קונים מהם</dt><dd>{stats.growers}</dd></div>
+      </dl>
+    </div>
+  </section>
+
+  <section class="section section--blush">
+    <div class="wrap two">
+      <Picture src={images.studio} alt={images.studioAlt} widths={[480, 720, 960]} sizes="(min-width: 900px) 40vw, 100vw" formats={['avif', 'webp']} loading="lazy" />
+      <div>
+        <h2>איך אנחנו עובדים</h2>
+        <ul class="ways">
+          <li><h3>קונים פעמיים בשבוע</h3><p>בימים ראשון ורביעי, ישר ממגדלים באזור בית שמש, בעמק יזרעאל ובערבה. כך הפרחים מגיעים אליכם יומיים אחרי שנחתכו, ולא שבוע.</p></li>
+          <li><h3>תמונה לפני כל משלוח</h3><p>כל זר מצולם לפני שהוא יוצא. אם משהו לא מתאים לכם, מתקנים לפני שהוא בדרך.</p></li>
+          <li><h3>נייר, לא פלסטיק</h3><p>הזרים עטופים בנייר ממוחזר, ושקית המים בתחתית מתכלה.</p></li>
+        </ul>
+        <h2 class="h-cred">לימודים והשתלמויות</h2>
+        <ul class="creds">{owner.credentials.map((c) => <li>{c}</li>)}</ul>
+      </div>
+    </div>
+  </section>
+
+  {site.isDemo && (
+    <section class="section demo">
+      <div class="wrap"><p>זהו אתר הדגמה. נועה אלמוג, הסטודיו והסיפור בדויים, והתמונות הן תמונות סטוק.</p></div>
+    </section>
+  )}
+
+  <CtaBand />
+</BaseLayout>
+
+<style>
+  .story { display: grid; gap: var(--space-7); }
+  @media (min-width: 900px) { .story { grid-template-columns: 1.5fr 1fr; gap: var(--space-8); } }
+  .prose p { font-size: 1.15rem; line-height: 1.8; }
+  .numbers { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-5); align-content: start; }
+  .numbers div { border-top: 1px solid var(--c-grape); padding-top: var(--space-3); display: flex; flex-direction: column-reverse; }
+  .numbers dt { font-family: var(--font-sans); font-size: 0.9rem; color: var(--c-muted); }
+  .numbers dd { font-size: var(--step-4); line-height: 1.1; color: var(--c-grape); font-weight: 350; }
+  .two { display: grid; gap: var(--space-7); align-items: start; }
+  .two :global(img) { width: 100%; aspect-ratio: 4 / 5; object-fit: cover; }
+  @media (min-width: 900px) { .two { grid-template-columns: 1fr 1.2fr; gap: var(--space-8); } }
+  .two h2 { font-size: var(--step-3); margin-bottom: var(--space-5); }
+  .ways { list-style: none; padding: 0; display: grid; gap: var(--space-5); }
+  .ways h3 { margin-bottom: var(--space-2); }
+  .h-cred { margin-top: var(--space-7); }
+  .creds { padding-inline-start: 1.2em; display: grid; gap: var(--space-2); }
+  .demo { padding-block: var(--space-6); }
+  .demo p { font-family: var(--font-sans); font-size: 0.9rem; color: var(--c-muted); }
+</style>

@@ -1,0 +1,52 @@
+---
+import { Picture } from 'astro:assets';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHead from '../../components/PageHead.astro';
+import CtaBand from '../../components/CtaBand.astro';
+import { services, images } from '../../config/site.config';
+import { breadcrumbSchema, home } from '../../lib/schema';
+import { price } from '../../lib/util';
+
+const crumbs = [home, { label: 'שירותים', href: '/services/' }];
+---
+<BaseLayout
+  title="שירותי פרחים בירושלים: זרים, מינויים, חתונות ועציצים"
+  description="כל מה שפרחי הגפן עושים: זרים למתנה עם משלוח בירושלים, מינוי פרחים שבועי לבית ולמשרד, עיצוב חתונות, פרחים לאזכרה ועציצים."
+  schema={[breadcrumbSchema(crumbs)]}
+>
+  <PageHead crumbs={crumbs} title="מה אנחנו עושים" lead="חמישה שירותים, סטודיו אחד בבקעה. לכל שירות יש עמוד עם מחירים, תהליך ושאלות נפוצות." image={images.studio} imageAlt={images.studioAlt} />
+
+  <section class="section">
+    <div class="wrap">
+      <ul class="list">
+        {services.map((s) => (
+          <li>
+            <Picture src={s.image} alt={s.imageAlt} widths={[400, 600, 800]} sizes="(min-width: 900px) 30vw, 100vw" formats={['avif', 'webp']} loading="lazy" />
+            <div class="text">
+              <h2><a href={`/services/${s.slug}/`}>{s.title}</a></h2>
+              <p>{s.intro}</p>
+              <p class="price">מ-{price(s.priceFrom)} {s.priceUnit}</p>
+            </div>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <CtaBand />
+</BaseLayout>
+
+<style>
+  .list { list-style: none; padding: 0; display: grid; gap: var(--space-8); }
+  .list li { display: grid; gap: var(--space-5); align-items: center; }
+  .list :global(img) { width: 100%; aspect-ratio: 3 / 2; object-fit: cover; }
+  .text { display: grid; gap: var(--space-3); max-width: 38rem; }
+  h2 { font-size: var(--step-3); }
+  h2 a { color: inherit; text-decoration: none; }
+  h2 a:hover { text-decoration: underline; text-decoration-thickness: 1px; }
+  .price { font-family: var(--font-sans); color: var(--c-vine); font-weight: 500; }
+  @media (min-width: 900px) {
+    .list li { grid-template-columns: 1fr 1.3fr; gap: var(--space-8); }
+    .list li:nth-child(even) :global(picture) { order: 2; }
+  }
+</style>

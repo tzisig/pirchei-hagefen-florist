@@ -1,0 +1,25 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Icon from '../components/Icon.astro';
+import { contact, owner } from '../config/site.config';
+import { waLink } from '../lib/util';
+---
+<BaseLayout title="תודה, קיבלנו את הפנייה" description="הפנייה התקבלה. נחזור אליכם בהקדם." noindex>
+  <section class="thanks">
+    <div class="wrap inner">
+      <h1>תודה, קיבלנו</h1>
+      <p class="lead">{owner.name.split(' ')[0]} תחזור אליכם בהקדם. {contact.responsePromise}.</p>
+      <p>ממהרים? כתבו לנו גם בוואטסאפ, ונענה משם.</p>
+      <div class="actions">
+        <a class="btn btn--wa" href={waLink()} target="_blank" rel="noopener"><Icon name="whatsapp" size={20} />וואטסאפ</a>
+        <a class="btn btn--ghost" href="/bouquets/">בינתיים, לקטלוג הזרים</a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .thanks { min-height: 60svh; display: grid; align-items: center; padding-block: var(--space-9); }
+  .inner { display: grid; gap: var(--space-4); justify-items: start; }
+  .actions { margin-top: var(--space-4); }
+</style>

@@ -1,0 +1,96 @@
+---
+import { Picture } from 'astro:assets';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHead from '../components/PageHead.astro';
+import SeasonCalendar from '../components/SeasonCalendar.astro';
+import InSeasonNow from '../components/InSeasonNow.astro';
+import CtaBand from '../components/CtaBand.astro';
+import { flowers, images, site } from '../config/site.config';
+import { breadcrumbSchema, home } from '../lib/schema';
+import { monthNames } from '../lib/util';
+
+const crumbs = [home, { label: 'מה פורח עכשיו', href: '/seasons/' }];
+
+// "דצמבר עד מרץ" from a list of months that may wrap around the year
+const range = (months: number[]) => {
+  if (months.length === 12) return 'כל השנה';
+  const start = months.find((m) => !months.includes(m === 1 ? 12 : m - 1)) ?? months[0];
+  const end = months.find((m) => !months.includes(m === 12 ? 1 : m + 1)) ?? months[months.length - 1];
+  return `${monthNames[start - 1]} עד ${monthNames[end - 1]}`;
+};
+
+const article = {
+  '@context': 'https://schema.org',
+  '@type': 'Article',
+  headline: 'לוח עונות הפרחים בישראל',
+  datePublished: site.updated,
+  dateModified: site.updated,
+  author: { '@type': 'Organization', name: site.name },
+  inLanguage: 'he',
+};
+---
+<BaseLayout
+  title="מה פורח עכשיו: לוח עונות הפרחים בישראל"
+  description="באיזה חודש יש כלניות, נוריות, אדמוניות וחמניות? לוח עונות של 15 פרחים, עם הסבר איך לבחור זר עונתי שמחזיק יותר ועולה פחות."
+  schema={[breadcrumbSchema(crumbs), article]}
+>
+  <PageHead crumbs={crumbs} title="מה פורח עכשיו" lead="פרח בעונה שלו מגיע מהמגדל ישר אלינו, בלי שבוע בקירור או טיסה מהולנד. לכן הוא טרי יותר, מחזיק יותר באגרטל ועולה פחות." image={images.seasonAnemone} imageAlt={images.seasonAnemoneAlt}>
+    <InSeasonNow />
+  </PageHead>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="head">
+        <h2>לוח העונות</h2>
+        <p>הלוח מראה מתי כל פרח זמין אצלנו, לפי המגדלים שאנחנו עובדים איתם. מזג האוויר יכול להזיז עונה בשבוע או שבועיים. עודכן ב-{site.updated.split('-').reverse().join('.')}.</p>
+      </div>
+      <SeasonCalendar />
+    </div>
+  </section>
+
+  <section class="section section--blush">
+    <div class="wrap">
+      <h2 class="h">הכירו את הפרחים</h2>
+      <ul class="glossary">
+        {flowers.map((f) => (
+          <li id={`f-${f.id}`}>
+            <h3>{f.name}</h3>
+            <p class="latin">{f.latin}</p>
+            <p class="when">{range(f.months)}{f.local && <span>, גידול ישראלי</span>}</p>
+            <p>{f.note}</p>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap feature">
+      <Picture src={images.seasonPurple} alt={images.seasonPurpleAlt} widths={[480, 720, 960]} sizes="(min-width: 900px) 45vw, 100vw" formats={['avif', 'webp']} loading="lazy" />
+      <div>
+        <h2>למה אין אדמוניות בנובמבר?</h2>
+        <p class="lead">אפשר להביא כמעט כל פרח בכל חודש, בטיסה מהצד השני של העולם. אבל פרח כזה נחתך שבוע לפני שהוא מגיע, עולה פי שלושה, ומחזיק חצי זמן.</p>
+        <p>לכן כשמבקשים מאיתנו פרח מחוץ לעונה, נציע תחליף שנראה דומה: ורדי גן במקום אדמוניות, ליזיאנתוס במקום נוריות. אם בכל זאת חשוב לכם דווקא הפרח הזה, נבדוק מחיר מהיבואן ונגיד לכם בכנות אם זה שווה.</p>
+      </div>
+    </div>
+  </section>
+
+  <CtaBand title="רוצים זר מהעונה?" text="כתבו לנו איזה צבע אתם אוהבים, ונרכיב זר ממה שהגיע השבוע מהמגדלים." />
+</BaseLayout>
+
+<style>
+  .h { font-size: var(--step-3); margin-bottom: var(--space-6); }
+  .glossary { list-style: none; padding: 0; display: grid; gap: var(--space-6) var(--space-5); }
+  @media (min-width: 640px) { .glossary { grid-template-columns: 1fr 1fr; } }
+  @media (min-width: 1000px) { .glossary { grid-template-columns: repeat(3, 1fr); } }
+  .glossary li { background: #fff; border: 1px solid var(--c-line); padding: var(--space-5); scroll-margin-top: 8rem; display: grid; gap: var(--space-2); align-content: start; }
+  .glossary li:target { border-color: var(--c-grape); box-shadow: inset 0 0 0 1px var(--c-grape); }
+  .glossary .latin { color: var(--c-muted); font-size: 0.95rem; text-align: right; }
+  .when { font-family: var(--font-sans); font-size: 0.9rem; color: var(--c-vine); font-weight: 500; }
+  .glossary p:last-child { font-size: 1rem; line-height: 1.6; }
+  .feature { display: grid; gap: var(--space-6); align-items: center; }
+  .feature :global(img) { width: 100%; aspect-ratio: 3 / 2; object-fit: cover; }
+  .feature h2 { margin-bottom: var(--space-4); }
+  .feature .lead { margin-bottom: var(--space-4); }
+  @media (min-width: 900px) { .feature { grid-template-columns: 1fr 1fr; gap: var(--space-8); } }
+</style>

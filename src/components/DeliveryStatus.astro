@@ -1,0 +1,64 @@
+---
+// Live same-day delivery status in Israel time. The static text is the fallback without JS.
+import { hours, deliveryRules } from '../config/site.config';
+interface Props { variant?: 'strip' | 'card' }
+const { variant = 'strip' } = Astro.props;
+const weekday = hours.find((h) => h.day === 0)!;
+const friday = hours.find((h) => h.day === 5)!;
+const fallback = `משלוח עוד היום בהזמנה עד ${weekday.cutoff} (בשישי עד ${friday.cutoff})`;
+---
+<p class:list={['status', variant]} data-delivery-status data-hours={JSON.stringify(hours)} data-tz={deliveryRules.timeZone}>
+  <span class="dot" aria-hidden="true"></span>
+  <span data-status-text>{fallback}</span>
+</p>
+
+<style>
+  .status { display: flex; align-items: center; gap: 0.6rem; font-family: var(--font-sans); font-size: 0.9rem; line-height: 1.4; margin: 0; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--c-tendril); flex: none; }
+  .status[data-state='closed'] .dot { background: #b9a8b8; }
+  .strip { justify-content: center; color: #efe6ee; }
+  .card { color: inherit; font-size: 1rem; }
+  .card .dot { width: 10px; height: 10px; }
+</style>
+
+<script>
+  type Day = { day: number; opens: string; closes: string; cutoff: string };
+  const toMin = (t: string) => { const [h, m] = t.split(':').map(Number); return h * 60 + m; };
+  const names = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'];
+
+  const update = () => {
+    document.querySelectorAll<HTMLElement>('[data-delivery-status]').forEach((el) => {
+      const days: Day[] = JSON.parse(el.dataset.hours || '[]');
+      const parts = new Intl.DateTimeFormat('en-GB', {
+        timeZone: el.dataset.tz, weekday: 'short', hour: '2-digit', minute: '2-digit', hourCycle: 'h23',
+      }).formatToParts(new Date());
+      const get = (t: string) => parts.find((p) => p.type === t)?.value || '';
+      const dayIdx = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].indexOf(get('weekday'));
+      const now = Number(get('hour')) * 60 + Number(get('minute'));
+      const today = days.find((d) => d.day === dayIdx);
+      const text = el.querySelector('[data-status-text]')!;
+
+      if (today?.cutoff && now < toMin(today.cutoff)) {
+        const left = toMin(today.cutoff) - now;
+        const h = Math.floor(left / 60);
+        const m = left % 60;
+        const leftText = h ? `${h} שע' ו-${m} דק'` : `${m} דקות`;
+        text.textContent = `משלוח עוד היום: נשארו ${leftText} להזמנה`;
+        el.dataset.state = 'open';
+        return;
+      }
+      // Next day with deliveries
+      for (let i = 1; i <= 7; i++) {
+        const next = days.find((d) => d.day === (dayIdx + i) % 7);
+        if (next?.cutoff) {
+          const when = i === 1 ? 'מחר' : `ביום ${names[next.day]}`;
+          text.textContent = `המשלוחים של היום כבר יצאו. הזמנה שתשלחו עכשיו תצא ${when} בבוקר.`;
+          break;
+        }
+      }
+      el.dataset.state = 'closed';
+    });
+  };
+  update();
+  setInterval(update, 60_000);
+</script>

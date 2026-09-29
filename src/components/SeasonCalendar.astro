@@ -1,0 +1,76 @@
+---
+// Twelve-month bloom calendar built from `flowers` in the config. The current month is marked at build
+// time and corrected in the browser, so a cached page still points at the right month.
+import { flowers } from '../config/site.config';
+import { monthNames, buildMonth } from '../lib/util';
+interface Props { compact?: boolean }
+const { compact = false } = Astro.props;
+const month = buildMonth();
+const short = monthNames.map((m) => m.slice(0, 3));
+---
+<div class:list={['calendar', { compact }]} data-season-calendar data-month={month}>
+  <div class="scroller" tabindex="0" role="region" aria-label="לוח עונות הפריחה, אפשר לגלול לצדדים">
+    <table>
+      <caption class="visually-hidden">באילו חודשים כל פרח זמין אצלנו</caption>
+      <thead>
+        <tr>
+          <th scope="col" class="flower-col">פרח</th>
+          {short.map((m, i) => (
+            <th scope="col" class:list={['m', { now: i + 1 === month }]} data-m={i + 1}>
+              <abbr title={monthNames[i]}>{m}</abbr>
+            </th>
+          ))}
+        </tr>
+      </thead>
+      <tbody>
+        {flowers.map((f) => (
+          <tr>
+            <th scope="row" class="flower-col">
+              <span class="fname">{f.name}</span>
+              {!compact && <span class="latin">{f.latin}</span>}
+            </th>
+            {monthNames.map((m, i) => {
+              const on = f.months.includes(i + 1);
+              return (
+                <td class:list={['m', { on, now: i + 1 === month }]} data-m={i + 1}>
+                  <span class="visually-hidden">{on ? `זמין ב${m}` : `לא זמין ב${m}`}</span>
+                </td>
+              );
+            })}
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+  <p class="legend"><span class="swatch" aria-hidden="true"></span> בעונה <span class="swatch now" aria-hidden="true"></span> החודש</p>
+</div>
+
+<style>
+  .scroller { overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; min-width: 40rem; font-family: var(--font-sans); font-size: 0.85rem; }
+  th, td { padding: 0; text-align: center; }
+  thead th { font-weight: 500; color: var(--c-muted); padding-bottom: 0.5rem; }
+  abbr { text-decoration: none; }
+  .flower-col { text-align: start; padding-inline-end: var(--space-4); white-space: nowrap; font-weight: 400; }
+  tbody th { padding-block: 0.4rem; border-top: 1px solid var(--c-line); }
+  .fname { font-family: var(--font-serif); font-size: 1.1rem; color: var(--c-grape); }
+  .latin { display: block; font-size: 0.8rem; color: var(--c-muted); text-align: start; }
+  td { border-top: 1px solid var(--c-line); position: relative; height: 2.6rem; }
+  td.on::after { content: ''; position: absolute; inset: 0.55rem 1px; background: var(--c-vine); opacity: 0.75; }
+  .m.now { background: color-mix(in srgb, var(--c-tendril) 45%, transparent); }
+  thead .m.now { color: var(--c-grape); font-weight: 600; }
+  td.on.now::after { background: var(--c-grape); opacity: 1; }
+  .compact td { height: 2rem; }
+  .compact td.on::after { inset: 0.4rem 1px; }
+  .legend { display: flex; align-items: center; gap: 0.5rem; margin-top: var(--space-4); font-family: var(--font-sans); font-size: 0.85rem; color: var(--c-muted); }
+  .swatch { display: inline-block; width: 1.2rem; height: 0.8rem; background: var(--c-vine); opacity: 0.75; }
+  .swatch.now { background: var(--c-grape); opacity: 1; margin-inline-start: var(--space-3); }
+</style>
+
+<script>
+  const month = Number(new Intl.DateTimeFormat('en', { timeZone: 'Asia/Jerusalem', month: 'numeric' }).format(new Date()));
+  document.querySelectorAll<HTMLElement>('[data-season-calendar]').forEach((cal) => {
+    if (Number(cal.dataset.month) === month) return;
+    cal.querySelectorAll<HTMLElement>('[data-m]').forEach((c) => c.classList.toggle('now', Number(c.dataset.m) === month));
+  });
+</script>

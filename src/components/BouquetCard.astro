@@ -1,0 +1,40 @@
+---
+// A bouquet shown as a herbarium specimen sheet: photo, then a label with the facts customers quote.
+import { Picture } from 'astro:assets';
+import Icon from './Icon.astro';
+import type { Bouquet } from '../config/site.config';
+import { waLink, price, sizeOf, bouquetOrderText } from '../lib/util';
+interface Props { bouquet: Bouquet; headingLevel?: 'h2' | 'h3'; eager?: boolean }
+const { bouquet: b, headingLevel = 'h3', eager = false } = Astro.props;
+const H = headingLevel;
+const size = sizeOf(b.size);
+---
+<article class="specimen" id={`b-${b.slug}`}>
+  <Picture src={b.image} alt={b.imageAlt} widths={[360, 540, 720]} sizes="(min-width: 1100px) 24rem, (min-width: 640px) 45vw, 92vw" formats={['avif', 'webp']} loading={eager ? 'eager' : 'lazy'} />
+  <div class="tag">
+    <H class="name"><span class="code">זר {b.code}</span>{b.name}</H>
+    <p class="desc">{b.description}</p>
+    <dl>
+      <div><dt>פרחים</dt><dd>{b.flowers.join(', ')}</dd></div>
+      <div><dt>גודל</dt><dd>{size.label}, {size.stems}</dd></div>
+      <div><dt>מחיר</dt><dd class="price">{price(size.price)}</dd></div>
+    </dl>
+    <a class="btn btn--wa btn--block" href={waLink(bouquetOrderText(b))} target="_blank" rel="noopener">
+      <Icon name="whatsapp" size={19} />הזמנת {b.name} בוואטסאפ
+    </a>
+  </div>
+</article>
+
+<style>
+  .specimen { display: grid; grid-template-rows: auto 1fr; background: #fff; border: 1px solid var(--c-line); scroll-margin-top: 8rem; }
+  .specimen :global(img) { width: 100%; aspect-ratio: 4 / 5; object-fit: cover; }
+  .tag { display: grid; gap: var(--space-3); padding: var(--space-5); align-content: start; }
+  .tag .btn { align-self: end; }
+  .name { display: grid; font-size: var(--step-2); font-weight: 450; }
+  .code { font-family: var(--font-sans); font-size: 0.8rem; font-weight: 500; color: var(--c-vine); margin-bottom: 0.2rem; }
+  .desc { color: var(--c-muted); font-size: 1rem; line-height: 1.6; }
+  dl { display: grid; font-family: var(--font-sans); font-size: 0.9rem; border-top: 1px solid var(--c-line); margin-bottom: var(--space-2); }
+  dl div { display: grid; grid-template-columns: 4.5rem 1fr; gap: var(--space-3); padding-block: 0.45rem; border-bottom: 1px solid var(--c-line); }
+  dt { color: var(--c-muted); }
+  .price { font-weight: 600; color: var(--c-grape); }
+</style>

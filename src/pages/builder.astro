@@ -1,0 +1,276 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHead from '../components/PageHead.astro';
+import Icon from '../components/Icon.astro';
+import { occasions, palettes, sizes, areas, flowers, hours, contact, deliveryRules, priceNote } from '../config/site.config';
+import { breadcrumbSchema, home } from '../lib/schema';
+import { price } from '../lib/util';
+
+const crumbs = [home, { label: 'בונה זרים', href: '/builder/' }];
+const data = {
+  flowers: flowers.map(({ id, name, months }) => ({ id, name, months })),
+  palettes: palettes.map(({ id, label, flowers: f }) => ({ id, label, flowers: f })),
+  sizes,
+  areas: areas.map(({ slug, name, fee }) => ({ slug, name, fee })),
+  occasions,
+  hours,
+  whatsapp: contact.whatsapp,
+  tz: deliveryRules.timeZone,
+};
+---
+<BaseLayout
+  title="בונה זרים: זר לפי אירוע, צבע ותקציב"
+  description="בוחרים אירוע, צבע, גודל ושכונה בירושלים, ומקבלים הצעה לזר מהפרחים שבעונה, מחיר כולל משלוח והודעת וואטסאפ מוכנה לשליחה."
+  schema={[breadcrumbSchema(crumbs)]}
+>
+  <PageHead crumbs={crumbs} title="בונה זרים" lead="ארבע בחירות קצרות, ובסוף הודעת וואטסאפ מוכנה עם כל הפרטים. את הפרחים עצמם נבחר לפי מה שיש בעונה, ונשלח לכם תמונה לפני שהזר יוצא." />
+
+  <section class="section">
+    <div class="wrap layout">
+      <noscript><p class="lead">בונה הזרים צריך JavaScript כדי לעבוד. אפשר לכתוב לנו ישירות בוואטסאפ או להתקשר, ונבנה את הזר יחד.</p></noscript>
+      <form class="builder" data-builder data-config={JSON.stringify(data)} novalidate>
+        <fieldset>
+          <legend><span class="n">1</span>לאיזה אירוע?</legend>
+          <div class="chips">
+            {occasions.map((o, i) => (
+              <label class="chip"><input type="radio" name="occasion" value={o.id} checked={i === 0} /><span>{o.label}</span></label>
+            ))}
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend><span class="n">2</span>באיזה צבע?</legend>
+          <div class="palette-grid">
+            {palettes.map((p, i) => (
+              <label class="pal">
+                <input type="radio" name="palette" value={p.id} checked={i === 0} />
+                <span class="swatches" aria-hidden="true">{p.swatch.map((c) => <span style={`background:${c}`}></span>)}</span>
+                <span class="pal-text"><strong>{p.label}</strong><span>{p.description}</span></span>
+              </label>
+            ))}
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend><span class="n">3</span>באיזה גודל?</legend>
+          <div class="sizes">
+            {sizes.map((s) => (
+              <label class="size">
+                <input type="radio" name="size" value={s.id} checked={s.id === 'm'} />
+                <span><strong>{s.label}</strong><span>{s.stems}</span><span class="p">{price(s.price)}</span></span>
+              </label>
+            ))}
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend><span class="n">4</span>לאן ומתי?</legend>
+          <div class="two">
+            <div class="field">
+              <label for="b-area">שכונה</label>
+              <select id="b-area" name="area">
+                <option value="pickup">איסוף עצמי מהחנות</option>
+                {areas.map((a) => <option value={a.slug} selected={a.slug === 'baka'}>{a.name} ({a.fee ? price(a.fee) : 'חינם'})</option>)}
+              </select>
+            </div>
+            <div class="field">
+              <label for="b-date">תאריך</label>
+              <input id="b-date" name="date" type="date" aria-describedby="b-date-note" />
+              <p class="note" id="b-date-note" data-date-note></p>
+            </div>
+          </div>
+          <div class="field">
+            <label for="b-card">מה לכתוב בכרטיס? <span class="hint">(לא חובה)</span></label>
+            <textarea id="b-card" name="card" rows="2" maxlength="200"></textarea>
+            <div class="ideas" data-card-ideas aria-label="רעיונות לברכה"></div>
+          </div>
+        </fieldset>
+      </form>
+
+      <aside class="summary on-dark" aria-labelledby="sum-title">
+        <div class="sticky">
+          <h2 id="sum-title">הזר שלכם</h2>
+          <p class="label">הפרחים שנציע, לפי העונה</p>
+          <ul class="flowers" data-sum-flowers></ul>
+          <dl class="lines">
+            <div><dt>זר</dt><dd data-sum-size></dd></div>
+            <div><dt>משלוח</dt><dd data-sum-fee></dd></div>
+            <div class="total"><dt>סה"כ</dt><dd data-sum-total></dd></div>
+          </dl>
+          <p class="small">{priceNote}</p>
+          <a class="btn btn--tendril btn--block" href="#" target="_blank" rel="noopener" data-sum-wa>
+            <Icon name="whatsapp" size={20} />שליחת ההזמנה בוואטסאפ
+          </a>
+          <p class="small">ההודעה נפתחת בוואטסאפ ואפשר לערוך אותה לפני השליחה. התשלום רק אחרי שתאשרו תמונה של הזר.</p>
+        </div>
+      </aside>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .layout { display: grid; gap: var(--space-7); }
+  @media (min-width: 1000px) { .layout { grid-template-columns: 1.6fr 1fr; align-items: start; } }
+  .builder { display: grid; gap: var(--space-7); }
+  fieldset { border: 0; padding: 0; display: grid; gap: var(--space-4); min-width: 0; }
+  legend { display: flex; align-items: center; gap: var(--space-3); font-size: var(--step-2); color: var(--c-grape); margin-bottom: var(--space-4); padding: 0; }
+  .n { display: grid; place-items: center; width: 2rem; height: 2rem; border-radius: 50%; border: 1px solid var(--c-grape); font-size: 1rem; font-family: var(--font-sans); flex: none; }
+
+  input[type='radio'] { position: absolute; opacity: 0; width: 1px; height: 1px; min-height: 0; }
+  .chips { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  .chip span {
+    display: inline-flex; align-items: center; min-height: 44px; padding: 0.4rem 1.05rem; cursor: pointer;
+    font-family: var(--font-sans); border: 1px solid var(--c-line); border-radius: var(--radius-l); background: #fff;
+  }
+  .chip input:checked + span { background: var(--c-grape); color: #fff; border-color: var(--c-grape); }
+  .chip input:focus-visible + span, .pal input:focus-visible ~ .pal-text, .size input:focus-visible + span { outline: 3px solid var(--c-vine); outline-offset: 2px; }
+
+  .palette-grid { display: grid; gap: 0.5rem; }
+  @media (min-width: 640px) { .palette-grid { grid-template-columns: 1fr 1fr; } }
+  .pal { display: flex; align-items: center; gap: var(--space-4); padding: 0.8rem 1rem; border: 1px solid var(--c-line); background: #fff; cursor: pointer; }
+  .pal:has(input:checked) { border-color: var(--c-grape); box-shadow: inset 0 0 0 1px var(--c-grape); }
+  .pal-text { display: grid; line-height: 1.35; }
+  .pal-text strong { font-weight: 500; color: var(--c-grape); font-size: 1.1rem; }
+  .pal-text span { font-size: 0.9rem; color: var(--c-muted); }
+  .swatches { display: flex; flex: none; }
+  .swatches span { width: 26px; height: 26px; border-radius: 50%; border: 2px solid #fff; }
+  .swatches span + span { margin-inline-start: -8px; }
+
+  .sizes { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
+  @media (min-width: 640px) { .sizes { grid-template-columns: repeat(4, 1fr); } }
+  .size > span { display: grid; padding: 0.8rem 1rem; border: 1px solid var(--c-line); background: #fff; cursor: pointer; line-height: 1.4; font-family: var(--font-sans); font-size: 0.9rem; color: var(--c-muted); }
+  .size strong { font-family: var(--font-serif); font-size: 1.25rem; font-weight: 500; color: var(--c-grape); }
+  .size .p { color: var(--c-text); font-weight: 600; margin-top: 0.3rem; }
+  .size input:checked + span { border-color: var(--c-grape); box-shadow: inset 0 0 0 1px var(--c-grape); background: var(--c-blush); }
+
+  .two { display: grid; gap: var(--space-4); }
+  @media (min-width: 640px) { .two { grid-template-columns: 1fr 1fr; } }
+  .note { font-family: var(--font-sans); font-size: 0.875rem; color: var(--c-muted); }
+  .note[data-warn] { color: var(--c-error); }
+  .ideas { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+  .ideas button { min-height: 40px; padding: 0.3rem 0.8rem; font-family: var(--font-serif); font-size: 0.95rem; color: var(--c-vine); background: none; border: 1px dashed var(--c-vine); border-radius: var(--radius-s); cursor: pointer; }
+
+  .summary { background: var(--c-grape); color: #efe6ee; padding: var(--space-6); }
+  @media (min-width: 1000px) { .summary { position: sticky; top: 7rem; } }
+  .summary h2 { font-size: var(--step-3); color: #fff; margin-bottom: var(--space-4); }
+  .summary .label { color: #d8c9d7; }
+  .flowers { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: 0.4rem; margin-block: var(--space-3) var(--space-5); min-height: 2.5rem; }
+  .flowers :global(li) { padding: 0.25rem 0.8rem; border: 1px solid rgb(255 255 255 / 0.3); border-radius: var(--radius-l); font-size: 1.05rem; }
+  .lines { font-family: var(--font-sans); border-top: 1px solid rgb(255 255 255 / 0.2); margin-bottom: var(--space-3); }
+  .lines div { display: flex; justify-content: space-between; padding-block: 0.55rem; border-bottom: 1px solid rgb(255 255 255 / 0.2); }
+  .total { font-weight: 600; color: #fff; font-size: 1.15rem; }
+  .small { font-family: var(--font-sans); font-size: 0.85rem; color: #d8c9d7; margin-block: var(--space-3); line-height: 1.5; }
+</style>
+
+<script>
+  type Cfg = {
+    flowers: { id: string; name: string; months: number[] }[];
+    palettes: { id: string; label: string; flowers: string[] }[];
+    sizes: { id: string; label: string; stems: string; price: number }[];
+    areas: { slug: string; name: string; fee: number }[];
+    occasions: { id: string; label: string; card: string[] }[];
+    hours: { day: number; cutoff: string }[];
+    whatsapp: string;
+    tz: string;
+  };
+  const form = document.querySelector<HTMLFormElement>('[data-builder]')!;
+  const cfg: Cfg = JSON.parse(form.dataset.config!);
+  const $ = <T extends Element>(s: string) => document.querySelector<T>(s)!;
+  const nis = (n: number) => `${n.toLocaleString('he-IL')} ₪`;
+
+  // Israel date/time now
+  const parts = new Intl.DateTimeFormat('en-CA', { timeZone: cfg.tz, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).formatToParts(new Date());
+  const p = (t: string) => parts.find((x) => x.type === t)!.value;
+  const todayIso = `${p('year')}-${p('month')}-${p('day')}`;
+  const nowMin = Number(p('hour')) * 60 + Number(p('minute'));
+  const month = Number(p('month'));
+  const dayOf = (iso: string) => new Date(`${iso}T12:00:00Z`).getUTCDay();
+  const toMin = (t: string) => { const [h, m] = t.split(':').map(Number); return h * 60 + m; };
+  const addDays = (iso: string, n: number) => { const d = new Date(`${iso}T12:00:00Z`); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
+
+  // Earliest possible delivery date
+  let first = todayIso;
+  for (let i = 0; i < 8; i++) {
+    const h = cfg.hours.find((x) => x.day === dayOf(first));
+    if (h?.cutoff && (first !== todayIso || nowMin < toMin(h.cutoff))) break;
+    first = addDays(first, 1);
+  }
+  const dateInput = $<HTMLInputElement>('#b-date');
+  dateInput.min = first;
+  dateInput.value = first;
+
+  // Preselect palette from ?palette=
+  const qp = new URLSearchParams(location.search).get('palette');
+  const qpInput = form.querySelector<HTMLInputElement>(`input[name="palette"][value="${qp}"]`);
+  if (qpInput) qpInput.checked = true;
+
+  const val = (name: string) => (form.elements.namedItem(name) as RadioNodeList | HTMLInputElement).value;
+
+  const renderIdeas = () => {
+    const occ = cfg.occasions.find((o) => o.id === val('occasion'))!;
+    const box = $<HTMLElement>('[data-card-ideas]');
+    box.replaceChildren(...occ.card.map((t) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.textContent = t;
+      b.setAttribute('aria-label', `להכניס לכרטיס: ${t}`);
+      b.addEventListener('click', () => { $<HTMLTextAreaElement>('#b-card').value = t; update(); });
+      return b;
+    }));
+  };
+
+  const update = () => {
+    const pal = cfg.palettes.find((x) => x.id === val('palette'))!;
+    const size = cfg.sizes.find((x) => x.id === val('size'))!;
+    const areaSlug = val('area');
+    const area = cfg.areas.find((a) => a.slug === areaSlug);
+    const fee = area ? area.fee : 0;
+    const occ = cfg.occasions.find((o) => o.id === val('occasion'))!;
+
+    const inSeason = pal.flowers.map((id) => cfg.flowers.find((f) => f.id === id)!).filter((f) => f.months.includes(month));
+    const picks = [...inSeason.slice(0, 3).map((f) => f.name), 'אקליפטוס'];
+    $<HTMLElement>('[data-sum-flowers]').replaceChildren(...picks.map((n) => { const li = document.createElement('li'); li.textContent = n; return li; }));
+
+    $<HTMLElement>('[data-sum-size]').textContent = `${size.label}, ${nis(size.price)}`;
+    $<HTMLElement>('[data-sum-fee]').textContent = area ? (fee ? nis(fee) : 'חינם') : 'איסוף עצמי';
+    $<HTMLElement>('[data-sum-total]').textContent = nis(size.price + fee);
+
+    // Date check
+    const note = $<HTMLElement>('[data-date-note]');
+    const d = dateInput.value;
+    let dateOk = true;
+    if (!d || d < first) { note.textContent = 'המועד הקרוב ביותר שאפשר: ' + first.split('-').reverse().join('.'); dateOk = false; }
+    else if (!cfg.hours.find((x) => x.day === dayOf(d))?.cutoff) { note.textContent = 'בשבת החנות סגורה. בחרו יום אחר.'; dateOk = false; }
+    else note.textContent = d === todayIso ? 'משלוח עוד היום' : '';
+    if (dateOk) note.removeAttribute('data-warn'); else note.setAttribute('data-warn', '');
+
+    const card = $<HTMLTextAreaElement>('#b-card').value.trim();
+    const lines = [
+      'שלום נועה, בניתי זר באתר:',
+      `אירוע: ${occ.label}`,
+      `צבע: ${pal.label}`,
+      `גודל: ${size.label} (${nis(size.price)})`,
+      `פרחים שהוצעו: ${picks.join(', ')}`,
+      area ? `משלוח ל${area.name} (${fee ? nis(fee) : 'חינם'})` : 'איסוף עצמי מהחנות',
+      `תאריך: ${d.split('-').reverse().join('.')}`,
+      card ? `כרטיס: ${card}` : 'בלי כרטיס',
+      `סה"כ משוער: ${nis(size.price + fee)}`,
+      'שם הנמען וכתובת: ',
+    ];
+    const wa = $<HTMLAnchorElement>('[data-sum-wa]');
+    wa.href = `https://wa.me/${cfg.whatsapp}?text=${encodeURIComponent(lines.join('\n'))}`;
+    wa.toggleAttribute('aria-disabled', !dateOk);
+    wa.classList.toggle('is-blocked', !dateOk);
+  };
+
+  form.addEventListener('change', (e) => {
+    if ((e.target as HTMLInputElement).name === 'occasion') renderIdeas();
+    update();
+  });
+  form.addEventListener('input', update);
+  $<HTMLAnchorElement>('[data-sum-wa]').addEventListener('click', (e) => {
+    if ((e.currentTarget as HTMLElement).hasAttribute('aria-disabled')) { e.preventDefault(); dateInput.focus(); }
+  });
+  renderIdeas();
+  update();
+</script>

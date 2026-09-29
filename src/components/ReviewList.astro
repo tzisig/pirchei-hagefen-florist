@@ -1,0 +1,29 @@
+---
+import Stars from './Stars.astro';
+import { reviews } from '../config/site.config';
+interface Props { limit?: number }
+const { limit } = Astro.props;
+const list = limit ? reviews.slice(0, limit) : reviews;
+---
+<ul class="reviews">
+  {list.map((r) => (
+    <li>
+      <figure>
+        <Stars rating={r.rating} />
+        <blockquote><p>{r.text}</p></blockquote>
+        <figcaption><strong>{r.name}</strong>, {r.area}<span class="svc">{r.service}</span></figcaption>
+      </figure>
+    </li>
+  ))}
+</ul>
+
+<style>
+  .reviews { list-style: none; padding: 0; display: grid; gap: var(--space-6) var(--space-7); }
+  @media (min-width: 760px) { .reviews { grid-template-columns: 1fr 1fr; } }
+  @media (min-width: 1100px) { .reviews { grid-template-columns: repeat(3, 1fr); } }
+  figure { display: grid; gap: var(--space-3); padding-top: var(--space-4); border-top: 2px solid var(--c-grape); align-content: start; }
+  blockquote { font-size: 1.15rem; line-height: 1.65; }
+  figcaption { font-family: var(--font-sans); font-size: 0.9rem; color: var(--c-muted); display: flex; flex-wrap: wrap; gap: 0.3rem; }
+  figcaption strong { color: var(--c-text); font-weight: 600; }
+  .svc { margin-inline-start: auto; color: var(--c-vine); }
+</style>

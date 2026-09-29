@@ -1,0 +1,45 @@
+---
+import { Picture } from 'astro:assets';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHead from '../components/PageHead.astro';
+import CtaBand from '../components/CtaBand.astro';
+import { gallery } from '../config/site.config';
+import { breadcrumbSchema, home } from '../lib/schema';
+
+const crumbs = [home, { label: 'גלריית אירועים', href: '/gallery/' }];
+---
+<BaseLayout
+  title="גלריית אירועים: חתונות ומרכזי שולחן"
+  description="זרי כלה, מרכזי שולחן ועיצוב פרחים לחתונות, בר מצוות ואירועי חברה בירושלים ובעין כרם. עם הסבר קצר על כל עבודה."
+  schema={[breadcrumbSchema(crumbs)]}
+>
+  <PageHead crumbs={crumbs} title="מהאירועים שלנו" lead="שש עבודות מהשנה האחרונה. ליד כל אחת כתבנו מה ביקשו מאיתנו ולמה בחרנו כך." />
+
+  <section class="section">
+    <div class="wrap">
+      <ul class="grid">
+        {gallery.map((g, i) => (
+          <li>
+            <figure>
+              <Picture src={g.image} alt={g.alt} widths={[480, 720, 960]} sizes="(min-width: 900px) 45vw, 100vw" formats={['avif', 'webp']} loading={i < 2 ? 'eager' : 'lazy'} />
+              <figcaption><h2>{g.title}</h2><p>{g.text}</p></figcaption>
+            </figure>
+          </li>
+        ))}
+      </ul>
+      <p class="note">התמונות באתר ההדגמה הן תמונות סטוק להמחשה.</p>
+    </div>
+  </section>
+
+  <CtaBand title="מתכננים אירוע?" text="ספרו לנו על התאריך, המקום ומספר האורחים. נחזור עם שאלות, ואחר כך עם הצעה." waText="שלום נועה, אשמח לדבר על פרחים לאירוע" />
+</BaseLayout>
+
+<style>
+  .grid { list-style: none; padding: 0; display: grid; gap: var(--space-7) var(--space-6); }
+  @media (min-width: 760px) { .grid { grid-template-columns: 1fr 1fr; } .grid li:nth-child(even) { margin-top: var(--space-9); } }
+  figure { display: grid; gap: var(--space-4); }
+  figure :global(img) { width: 100%; aspect-ratio: 4 / 5; object-fit: cover; }
+  h2 { font-size: var(--step-2); margin-bottom: var(--space-2); }
+  figcaption p { color: var(--c-muted); }
+  .note { margin-top: var(--space-7); font-family: var(--font-sans); font-size: 0.875rem; color: var(--c-muted); }
+</style>

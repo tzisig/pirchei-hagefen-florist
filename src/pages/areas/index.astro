@@ -1,0 +1,52 @@
+---
+import { Picture } from 'astro:assets';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHead from '../../components/PageHead.astro';
+import CtaBand from '../../components/CtaBand.astro';
+import { areas, deliveryRules, images } from '../../config/site.config';
+import { breadcrumbSchema, home } from '../../lib/schema';
+import { price } from '../../lib/util';
+
+const crumbs = [home, { label: 'אזורי משלוח', href: '/areas/' }];
+---
+<BaseLayout
+  title="אזורי משלוח פרחים בירושלים"
+  description="משלוח פרחים לבקעה, קטמון, רחביה, ארנונה, בית הכרם ועין כרם. דמי משלוח, זמני הגעה ומה חשוב לדעת על כל שכונה."
+  schema={[breadcrumbSchema(crumbs)]}
+>
+  <PageHead crumbs={crumbs} title="לאן אנחנו מגיעים" lead={`שש שכונות בדרום ובמערב ירושלים, בשליחים שלנו ולא בחברת שליחויות. ${deliveryRules.pickupNote}`} image={images.delivery} imageAlt={images.deliveryAlt} />
+
+  <section class="section">
+    <div class="wrap">
+      <ul class="areas">
+        {areas.map((a) => (
+          <li>
+            <a href={`/areas/${a.slug}/`}>
+              <Picture src={a.image} alt="" widths={[400, 640]} sizes="(min-width: 900px) 30vw, 100vw" formats={['avif', 'webp']} loading="lazy" />
+              <span class="name">{a.name}</span>
+            </a>
+            <p>{a.intro}</p>
+            <p class="meta">{a.fee ? `משלוח ${price(a.fee)}` : 'משלוח חינם'}, {a.window}</p>
+          </li>
+        ))}
+      </ul>
+      <p class="more">גרים בשכונה אחרת בירושלים? <a href="/contact/">כתבו לנו</a>, ולרוב נמצא דרך.</p>
+    </div>
+  </section>
+
+  <CtaBand />
+</BaseLayout>
+
+<style>
+  .areas { list-style: none; padding: 0; display: grid; gap: var(--space-7) var(--space-5); }
+  @media (min-width: 640px) { .areas { grid-template-columns: 1fr 1fr; } }
+  @media (min-width: 1000px) { .areas { grid-template-columns: repeat(3, 1fr); } }
+  .areas li { display: grid; gap: var(--space-3); align-content: start; }
+  .areas a { display: grid; gap: var(--space-3); text-decoration: none; }
+  .areas :global(img) { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; }
+  .name { font-size: var(--step-3); color: var(--c-grape); line-height: 1.1; }
+  .areas a:hover .name { text-decoration: underline; text-decoration-thickness: 1px; }
+  .areas p { color: var(--c-muted); font-size: 1rem; line-height: 1.6; }
+  .meta { font-family: var(--font-sans); color: var(--c-vine) !important; font-weight: 500; }
+  .more { margin-top: var(--space-7); }
+</style>

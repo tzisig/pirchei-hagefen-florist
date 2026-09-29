@@ -1,0 +1,35 @@
+---
+import Icon from './Icon.astro';
+import DeliveryStatus from './DeliveryStatus.astro';
+import { waLink, telLink } from '../lib/util';
+import { contact } from '../config/site.config';
+interface Props { title?: string; text?: string; waText?: string }
+const {
+  title = 'למי שולחים פרחים היום?',
+  text = 'כתבו לנו בוואטסאפ למי הזר ולאן הוא הולך. נחזור עם הצעה ותמונה תוך שעה.',
+  waText,
+} = Astro.props;
+---
+<section class="cta section--grape on-dark">
+  <div class="wrap inner">
+    <div>
+      <h2>{title}</h2>
+      <p class="lead">{text}</p>
+    </div>
+    <div class="side">
+      <DeliveryStatus variant="card" />
+      <div class="actions">
+        <a class="btn btn--tendril" href={waLink(waText)} target="_blank" rel="noopener"><Icon name="whatsapp" size={20} />כתבו לנו בוואטסאפ</a>
+        <a class="btn btn--ghost" href={telLink} dir="ltr"><Icon name="phone" size={18} />{contact.phone}</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .cta { padding-block: var(--space-8); }
+  .inner { display: grid; gap: var(--space-6); align-items: end; }
+  .inner h2 { margin-bottom: var(--space-4); }
+  .side { display: grid; gap: var(--space-5); color: #efe6ee; }
+  @media (min-width: 900px) { .inner { grid-template-columns: 1.3fr 1fr; gap: var(--space-8); } }
+</style>

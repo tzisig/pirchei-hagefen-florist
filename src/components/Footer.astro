@@ -1,0 +1,85 @@
+---
+import Logo from './Logo.astro';
+import Icon from './Icon.astro';
+import { site, contact, hours, areas, services, owner } from '../config/site.config';
+import { waLink, telLink, price } from '../lib/util';
+const year = new Date().getFullYear();
+---
+<footer class="footer on-dark">
+  <div class="wrap grid">
+    <div class="brand">
+      <Logo tone="light" />
+      <p>{site.tagline}. {owner.short}</p>
+      <div class="actions">
+        <a class="btn btn--tendril" href={waLink()} target="_blank" rel="noopener"><Icon name="whatsapp" size={19} />הזמנה בוואטסאפ</a>
+        <a class="btn btn--ghost" href={telLink} dir="ltr"><Icon name="phone" size={17} />{contact.phone}</a>
+      </div>
+    </div>
+
+    <div>
+      <h2 class="col-title">שעות פתיחה</h2>
+      <table class="hours">
+        <caption class="visually-hidden">שעות פתיחה ושעת הזמנה אחרונה למשלוח באותו יום</caption>
+        <thead><tr><th scope="col">יום</th><th scope="col">פתוח</th><th scope="col">משלוח היום עד</th></tr></thead>
+        <tbody>
+          {hours.map((h) => (
+            <tr>
+              <th scope="row">{h.label}</th>
+              {h.opens ? <td dir="ltr">{h.opens}-{h.closes}</td> : <td>סגור</td>}
+              <td dir="ltr">{h.cutoff || '-'}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+
+    <div>
+      <h2 class="col-title">משלוחים בירושלים</h2>
+      <ul class="links">
+        {areas.map((a) => <li><a href={`/areas/${a.slug}/`}>{a.name}</a> <span class="fee">{a.fee ? price(a.fee) : 'חינם'}</span></li>)}
+      </ul>
+    </div>
+
+    <div>
+      <h2 class="col-title">שירותים</h2>
+      <ul class="links">
+        {services.map((s) => <li><a href={`/services/${s.slug}/`}>{s.title}</a></li>)}
+        <li><a href="/gallery/">גלריית אירועים</a></li>
+        <li><a href="/reviews/">המלצות</a></li>
+        <li><a href="/faq/">שאלות נפוצות</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="wrap bottom">
+    <p><Icon name="pin" size={15} /> {contact.street}, {contact.neighborhood}, {contact.locality}. <a href={`mailto:${contact.email}`}>{contact.email}</a></p>
+    <ul class="legal">
+      <li><a href="/terms/">תנאי הזמנה ומשלוח</a></li>
+      <li><a href="/privacy/">מדיניות פרטיות</a></li>
+      <li><a href="/accessibility/">הצהרת נגישות</a></li>
+      <li><button type="button" class="linklike" data-cookie-settings>הגדרות עוגיות</button></li>
+    </ul>
+    <p class="copy">© {year} {site.name}.{site.isDemo && <> {site.demoNote}</>}</p>
+  </div>
+</footer>
+
+<style>
+  .footer { background: var(--c-grape-deep); color: #d8c9d7; padding-block: var(--space-8) calc(var(--space-6)); font-size: 0.975rem; }
+  .grid { display: grid; gap: var(--space-7); }
+  @media (min-width: 760px) { .grid { grid-template-columns: 1.4fr 1fr; } }
+  @media (min-width: 1100px) { .grid { grid-template-columns: 1.5fr 1.1fr 0.9fr 0.9fr; } }
+  .brand p { margin-block: var(--space-4) var(--space-5); max-width: 28rem; }
+  .col-title { font-family: var(--font-sans); font-size: 0.95rem; font-weight: 600; color: #fff; margin-bottom: var(--space-4); }
+  .links { list-style: none; padding: 0; display: grid; gap: 0.35rem; }
+  .footer a:not(.btn) { color: #fff; }
+  .fee { font-family: var(--font-sans); font-size: 0.8rem; color: var(--c-tendril); margin-inline-start: 0.3rem; }
+  .hours { border-collapse: collapse; font-family: var(--font-sans); font-size: 0.875rem; width: 100%; }
+  .hours th, .hours td { text-align: start; padding: 0.3rem 0; padding-inline-end: 0.8rem; border-bottom: 1px solid rgb(255 255 255 / 0.1); font-weight: 400; }
+  .hours thead th { color: #b9a8b8; font-size: 0.8rem; }
+  .hours tbody th { color: #fff; }
+  .bottom { margin-top: var(--space-7); padding-top: var(--space-5); border-top: 1px solid rgb(255 255 255 / 0.14); display: grid; gap: var(--space-3); font-family: var(--font-sans); font-size: 0.85rem; }
+  .bottom p { display: flex; flex-wrap: wrap; align-items: center; gap: 0.35rem; }
+  .legal { display: flex; flex-wrap: wrap; gap: 0.4rem 1.2rem; list-style: none; padding: 0; }
+  .linklike { font: inherit; color: #fff; background: none; border: 0; padding: 0; text-decoration: underline; text-underline-offset: 0.2em; cursor: pointer; }
+  .copy { color: #b9a8b8; }
+</style>

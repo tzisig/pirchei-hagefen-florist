@@ -1,0 +1,117 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHead from '../../components/PageHead.astro';
+import Icon from '../../components/Icon.astro';
+import BouquetCard from '../../components/BouquetCard.astro';
+import CtaBand from '../../components/CtaBand.astro';
+import { areas, bouquets, services, hours, site, reviews, type Area } from '../../config/site.config';
+import { breadcrumbSchema, businessRef, home } from '../../lib/schema';
+import { price, waLink } from '../../lib/util';
+
+export function getStaticPaths() {
+  return areas.map((a, i) => ({ params: { slug: a.slug }, props: { area: a, index: i } }));
+}
+interface Props { area: Area; index: number }
+const { area: a, index } = Astro.props;
+
+const crumbs = [home, { label: 'אזורי משלוח', href: '/areas/' }, { label: a.name, href: `/areas/${a.slug}/` }];
+const fee = a.fee ? price(a.fee) : 'חינם';
+// Two different catalog bouquets per neighborhood, so the pages do not repeat each other
+const picks = [bouquets[(index * 2) % bouquets.length], bouquets[(index * 2 + 1) % bouquets.length]];
+const nearby = a.nearby.map((slug) => areas.find((x) => x.slug === slug)!).filter(Boolean);
+const localReview = reviews.find((r) => r.area === a.name) ?? reviews.find((r) => a.intro.includes(r.area));
+const weekday = hours.find((h) => h.day === 0)!;
+const friday = hours.find((h) => h.day === 5)!;
+
+const serviceSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Service',
+  name: `משלוח פרחים ל${a.name}`,
+  serviceType: 'משלוח פרחים',
+  provider: businessRef,
+  areaServed: { '@type': 'Place', name: `${a.name}, ירושלים` },
+  url: `${site.url}/areas/${a.slug}/`,
+  offers: { '@type': 'Offer', price: a.fee, priceCurrency: 'ILS', description: 'דמי משלוח' },
+};
+---
+<BaseLayout
+  title={`${a.keyword}, ירושלים`}
+  description={`משלוח פרחים ל${a.name} בירושלים: דמי משלוח ${fee}, ${a.window}. זרים עונתיים מהסטודיו בבקעה, עם תמונה לאישור לפני שהזר יוצא.`}
+  schema={[breadcrumbSchema(crumbs), serviceSchema]}
+  ogImage={a.image}
+>
+  <PageHead crumbs={crumbs} title={`פרחים ל${a.name}`} lead={a.intro} image={a.image} imageAlt={a.imageAlt}>
+    <dl class="facts">
+      <div><dt>דמי משלוח</dt><dd>{fee}</dd></div>
+      <div><dt>זמן הגעה</dt><dd>{a.window}</dd></div>
+      <div><dt>הזמנה להיום עד</dt><dd dir="ltr">{weekday.cutoff}</dd></div>
+    </dl>
+    <div class="actions">
+      <a class="btn btn--wa" href={waLink(`שלום נועה, אשמח להזמין זר למשלוח ל${a.name}`)} target="_blank" rel="noopener"><Icon name="whatsapp" size={20} />הזמנה ל{a.name}</a>
+    </div>
+  </PageHead>
+
+  <section class="section">
+    <div class="wrap">
+      <h2 class="h">מה כדאי לדעת על משלוח ל{a.name}</h2>
+      <div class="local">
+        {a.local.map((l) => <article><h3>{l.title}</h3><p>{l.text}</p></article>)}
+      </div>
+      <p class="landmarks"><Icon name="pin" size={16} /> מגיעים גם ל: {a.landmarks.join(', ')}</p>
+      <p class="friday">בימי שישי ההזמנה האחרונה למשלוח באותו יום היא עד {friday.cutoff}.</p>
+    </div>
+  </section>
+
+  {localReview && (
+    <section class="section section--blush">
+      <div class="wrap quote">
+        <blockquote><p>{localReview.text}</p></blockquote>
+        <p class="who">{localReview.name}, {localReview.area}</p>
+      </div>
+    </section>
+  )}
+
+  <section class="section">
+    <div class="wrap">
+      <div class="head"><h2>זרים שיוצאים ל{a.name}</h2><p><a href="/bouquets/">לכל הקטלוג</a></p></div>
+      <div class="picks">{picks.map((b) => <BouquetCard bouquet={b} />)}</div>
+    </div>
+  </section>
+
+  <section class="section section--blush">
+    <div class="wrap two">
+      <div>
+        <h2 class="h">עוד שירותים ב{a.name}</h2>
+        <ul class="links">{services.map((s) => <li><a href={`/services/${s.slug}/`}>{s.title}</a></li>)}</ul>
+      </div>
+      <div>
+        <h2 class="h">שכונות סמוכות</h2>
+        <ul class="links">{nearby.map((n) => <li><a href={`/areas/${n.slug}/`}>משלוח פרחים ל{n.name}</a></li>)}</ul>
+      </div>
+    </div>
+  </section>
+
+  <CtaBand title={`שולחים פרחים ל${a.name}?`} waText={`שלום נועה, אשמח להזמין זר למשלוח ל${a.name}`} />
+</BaseLayout>
+
+<style>
+  .facts { display: flex; flex-wrap: wrap; gap: var(--space-3) var(--space-6); font-family: var(--font-sans); }
+  .facts div { display: grid; }
+  .facts dt { font-size: 0.85rem; color: var(--c-muted); }
+  .facts dd { font-size: 1.15rem; font-weight: 600; color: var(--c-grape); }
+  .h { font-size: var(--step-3); margin-bottom: var(--space-6); }
+  .local { display: grid; gap: var(--space-6); }
+  @media (min-width: 900px) { .local { grid-template-columns: repeat(3, 1fr); } }
+  .local article { border-top: 1px solid var(--c-grape); padding-top: var(--space-4); }
+  .local h3 { margin-bottom: var(--space-3); }
+  .landmarks { display: flex; gap: 0.4rem; align-items: center; margin-top: var(--space-7); font-family: var(--font-sans); color: var(--c-muted); flex-wrap: wrap; }
+  .friday { font-family: var(--font-sans); color: var(--c-muted); margin-top: var(--space-2); }
+  .quote { max-width: 46rem; }
+  .quote blockquote { font-size: var(--step-2); line-height: 1.45; color: var(--c-grape); }
+  .who { font-family: var(--font-sans); color: var(--c-muted); margin-top: var(--space-4); }
+  .picks { display: grid; gap: var(--space-5); }
+  @media (min-width: 640px) { .picks { grid-template-columns: 1fr 1fr; max-width: 52rem; } }
+  .two { display: grid; gap: var(--space-7); }
+  @media (min-width: 900px) { .two { grid-template-columns: 1fr 1fr; } }
+  .links { list-style: none; padding: 0; display: grid; gap: var(--space-2); font-size: 1.15rem; }
+</style>

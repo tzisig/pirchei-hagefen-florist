@@ -1,0 +1,102 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHead from '../components/PageHead.astro';
+import BouquetCard from '../components/BouquetCard.astro';
+import CtaBand from '../components/CtaBand.astro';
+import { bouquets, palettes, sizes, priceNote, site } from '../config/site.config';
+import { breadcrumbSchema, home } from '../lib/schema';
+import { price, sizeOf } from '../lib/util';
+
+const crumbs = [home, { label: 'קטלוג זרים', href: '/bouquets/' }];
+
+const itemList = {
+  '@context': 'https://schema.org',
+  '@type': 'ItemList',
+  name: 'קטלוג הזרים',
+  itemListElement: bouquets.map((b, i) => ({
+    '@type': 'ListItem',
+    position: i + 1,
+    item: {
+      '@type': 'Product',
+      name: `זר ${b.code} ${b.name}`,
+      description: b.description,
+      url: `${site.url}/bouquets/#b-${b.slug}`,
+      brand: { '@type': 'Brand', name: site.name },
+      offers: { '@type': 'Offer', price: sizeOf(b.size).price, priceCurrency: 'ILS', availability: 'https://schema.org/InStock' },
+    },
+  })),
+};
+---
+<BaseLayout
+  title="קטלוג זרים עם מחירים"
+  description="12 זרים עונתיים עם מספר, מחיר וגודל. בוחרים זר, שולחים את המספר בוואטסאפ, ומקבלים תמונה של הזר לפני המשלוח בירושלים."
+  schema={[breadcrumbSchema(crumbs), itemList]}
+>
+  <PageHead crumbs={crumbs} title="קטלוג הזרים" lead="שנים עשר זרים שאנחנו מכינים לאורך השנה. כל זר מקבל מספר: כותבים לנו אותו בוואטסאפ, ואנחנו מתאימים את הפרחים למה שיש השבוע ושולחים לכם תמונה לאישור.">
+    <nav class="filters" aria-label="סינון לפי צבע">
+      <button type="button" aria-pressed="true" data-filter="all">הכל</button>
+      {palettes.map((p) => <button type="button" aria-pressed="false" data-filter={p.id}>{p.label}</button>)}
+    </nav>
+  </PageHead>
+
+  <section class="section">
+    <div class="wrap">
+      <p class="visually-hidden" aria-live="polite" data-filter-status></p>
+      <div class="grid">
+        {bouquets.map((b, i) => <div data-palette={b.palette}><BouquetCard bouquet={b} headingLevel="h2" eager={i < 2} /></div>)}
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--blush">
+    <div class="wrap sizes">
+      <div>
+        <h2>ארבעה גדלים</h2>
+        <p class="lead">כל זר בקטלוג אפשר להזמין גם בגודל אחר. {priceNote}</p>
+      </div>
+      <table>
+        <caption class="visually-hidden">גדלים ומחירים של זרים</caption>
+        <thead><tr><th scope="col">גודל</th><th scope="col">כמה פרחים</th><th scope="col">מחיר</th></tr></thead>
+        <tbody>
+          {sizes.map((s) => <tr><th scope="row">{s.label}</th><td>{s.stems}</td><td>{price(s.price)}</td></tr>)}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <CtaBand title="לא מצאתם את הזר?" text="ספרו לנו למי הוא ומה היא אוהבת, או נסו את בונה הזרים. נרכיב זר מיוחד מהפרחים שיש השבוע." />
+</BaseLayout>
+
+<style>
+  .filters { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: var(--space-3); }
+  .filters button {
+    min-height: 44px; padding: 0.4rem 1rem; font-family: var(--font-sans); font-size: 0.95rem; cursor: pointer;
+    background: transparent; color: var(--c-grape); border: 1px solid var(--c-line); border-radius: var(--radius-l);
+  }
+  .filters button[aria-pressed='true'] { background: var(--c-grape); color: #fff; border-color: var(--c-grape); }
+  .grid { display: grid; gap: var(--space-5); }
+  @media (min-width: 640px) { .grid { grid-template-columns: 1fr 1fr; } }
+  @media (min-width: 1100px) { .grid { grid-template-columns: repeat(3, 1fr); } }
+  .grid > div { display: grid; }
+  .grid > div[hidden] { display: none; }
+  .sizes { display: grid; gap: var(--space-6); }
+  @media (min-width: 900px) { .sizes { grid-template-columns: 1fr 1fr; gap: var(--space-8); align-items: end; } }
+  .sizes h2 { margin-bottom: var(--space-4); }
+  table { width: 100%; border-collapse: collapse; font-family: var(--font-sans); }
+  th, td { text-align: start; padding: 0.8rem 0; padding-inline-end: var(--space-4); border-bottom: 1px solid var(--c-line); font-weight: 400; }
+  thead th { font-size: 0.85rem; color: var(--c-muted); }
+  tbody th { font-family: var(--font-serif); font-size: 1.2rem; color: var(--c-grape); }
+</style>
+
+<script>
+  const buttons = document.querySelectorAll<HTMLButtonElement>('[data-filter]');
+  const items = document.querySelectorAll<HTMLElement>('[data-palette]');
+  const status = document.querySelector('[data-filter-status]')!;
+  buttons.forEach((btn) => btn.addEventListener('click', () => {
+    const f = btn.dataset.filter!;
+    buttons.forEach((b) => b.setAttribute('aria-pressed', String(b === btn)));
+    let shown = 0;
+    items.forEach((el) => { el.hidden = f !== 'all' && el.dataset.palette !== f; if (!el.hidden) shown++; });
+    status.textContent = `מוצגים ${shown} זרים`;
+  }));
+</script>

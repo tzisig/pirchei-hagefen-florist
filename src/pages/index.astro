@@ -1,0 +1,323 @@
+---
+import { Picture } from 'astro:assets';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Icon from '../components/Icon.astro';
+import BouquetCard from '../components/BouquetCard.astro';
+import InSeasonNow from '../components/InSeasonNow.astro';
+import ReviewList from '../components/ReviewList.astro';
+import Stars from '../components/Stars.astro';
+import FaqList from '../components/FaqList.astro';
+import CtaBand from '../components/CtaBand.astro';
+import { site, owner, images, heroSpecimens, bouquets, services, areas, palettes, stats, faq, deliveryRules } from '../config/site.config';
+import { waLink, price, flowerById } from '../lib/util';
+import { faqSchema } from '../lib/schema';
+
+const featured = bouquets.slice(0, 6);
+const homeFaq = faq.slice(0, 5);
+const years = new Date().getFullYear() - site.foundedYear;
+---
+<BaseLayout
+  title={`${site.name}: משלוח פרחים בירושלים, זרים ועיצוב אירועים`}
+  description="חנות פרחים בבקעה, ירושלים. זרים מפרחים עונתיים ישר מהמגדלים, משלוח עוד היום ברחביה, קטמון, בית הכרם ועין כרם, מינויים ועיצוב חתונות."
+  schema={[faqSchema(homeFaq)]}
+>
+  <section class="hero on-dark">
+    <div class="photo-box">
+      <Picture
+        src={images.hero}
+        alt={images.heroAlt}
+        widths={[640, 960, 1440, 2000, 2400]}
+        sizes="100vw"
+        formats={['avif', 'webp']}
+        loading="eager"
+        fetchpriority="high"
+        class="hero-photo"
+      />
+      <ul class="specimens" aria-label="הפרחים בתמונה">
+        {heroSpecimens.map((s) => {
+          const f = flowerById(s.flower);
+          return (
+            <li style={`--x:${s.x}%;--y:${s.y}%`}>
+              <a href={`/seasons/#f-${f.id}`}>
+                <span class="he">{f.name}</span>
+                <span class="latin">{f.latin}</span>
+              </a>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+    <div class="wrap hero-text">
+      <h1>זרים מהמגדלים, אצלכם בירושלים עוד היום</h1>
+      <p class="lead">
+        נועה ואנחנו בוחרים פרחים פעמיים בשבוע ישר מהחממות, ומרכיבים אותם בסטודיו בבקעה.
+        מזמינים בוואטסאפ, מקבלים תמונה של הזר לפני שהוא יוצא.
+      </p>
+      <div class="actions">
+        <a class="btn btn--tendril" href={waLink()} target="_blank" rel="noopener"><Icon name="whatsapp" size={20} />הזמנה בוואטסאפ</a>
+        <a class="btn btn--ghost" href="/bouquets/">לקטלוג הזרים</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="head">
+        <h2>הזרים של העונה</h2>
+        <p>כל זר מקבל מספר. כותבים לנו את המספר בוואטסאפ, ואנחנו מתאימים את הפרחים למה שהגיע השבוע.</p>
+      </div>
+      <div class="bouquets">
+        {featured.map((b) => <BouquetCard bouquet={b} />)}
+      </div>
+      <p class="more"><a class="btn btn--ghost" href="/bouquets/">כל 12 הזרים בקטלוג</a></p>
+    </div>
+  </section>
+
+  <section class="section section--blush">
+    <div class="wrap">
+      <div class="head">
+        <h2>איך מזמינים</h2>
+        <p>{deliveryRules.sameDayNote}</p>
+      </div>
+      <ol class="steps">
+        <li><h3>בוחרים זר</h3><p>מהקטלוג, או לפי צבע ותקציב בבונה הזרים.</p></li>
+        <li><h3>שולחים הודעה</h3><p>וואטסאפ עם מספר הזר, השכונה והברכה לכרטיס.</p></li>
+        <li><h3>מאשרים תמונה</h3><p>לפני היציאה נשלח לכם תמונה של הזר האמיתי.</p></li>
+        <li><h3>הזר מגיע</h3><p>השליח מתקשר לנמען, ואתם מקבלים הודעה כשהזר נמסר.</p></li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="head">
+        <h2>מה אנחנו עושים</h2>
+        <p>זרים למתנה הם רוב העבודה. לצידם: מינויים שבועיים, חתונות, פרחים לאזכרה ועציצים.</p>
+      </div>
+      <ul class="services">
+        {services.map((s) => (
+          <li>
+            <a href={`/services/${s.slug}/`}>
+              <Picture src={s.image} alt="" widths={[160, 320]} sizes="160px" formats={['avif', 'webp']} loading="lazy" class="thumb" />
+              <span class="s-title">{s.title}</span>
+              <span class="s-short">{s.short}</span>
+              <span class="s-price">מ-{price(s.priceFrom)} {s.priceUnit}</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <section class="section section--grape on-dark builder-teaser">
+    <div class="wrap teaser">
+      <div>
+        <h2>לא בטוחים מה לבחור?</h2>
+        <p class="lead">בונה הזרים שואל שלוש שאלות: לאיזה אירוע, באיזה צבע ובאיזה תקציב. בסוף תקבלו הצעה מהפרחים שיש בעונה, והודעת וואטסאפ מוכנה.</p>
+      </div>
+      <div>
+        <p class="label">מתחילים מצבע</p>
+        <ul class="palettes">
+          {palettes.map((p) => (
+            <li>
+              <a href={`/builder/?palette=${p.id}`}>
+                <span class="swatches" aria-hidden="true">{p.swatch.map((c) => <span style={`background:${c}`}></span>)}</span>
+                {p.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap season">
+      <div>
+        <h2>קונים בעונה, ומשלמים פחות</h2>
+        <p class="lead">פרח בעונה שלו זול יותר, טרי יותר ומחזיק יותר זמן באגרטל. לכן הזרים שלנו משתנים מחודש לחודש.</p>
+        <p><a href="/seasons/">לוח העונות המלא, חודש אחרי חודש</a></p>
+      </div>
+      <InSeasonNow />
+    </div>
+  </section>
+
+  <section class="section section--blush">
+    <div class="wrap">
+      <div class="head">
+        <h2>משלוחים בירושלים</h2>
+        <p>{deliveryRules.pickupNote}</p>
+      </div>
+      <table class="areas">
+        <caption class="visually-hidden">דמי משלוח וזמני הגעה לפי שכונה</caption>
+        <thead><tr><th scope="col">שכונה</th><th scope="col">דמי משלוח</th><th scope="col">זמן הגעה</th></tr></thead>
+        <tbody>
+          {areas.map((a) => (
+            <tr>
+              <th scope="row"><a href={`/areas/${a.slug}/`}>{a.name}</a></th>
+              <td>{a.fee ? price(a.fee) : 'חינם'}</td>
+              <td>{a.window}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <p class="more"><a href="/delivery/">בדיקת משלוח לפי שכונה ויום</a></p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="head">
+        <h2>מה כותבים עלינו</h2>
+        <p class="rating"><Stars rating={stats.rating} /> {stats.rating} מתוך 5, לפי {stats.reviewCount} ביקורות</p>
+      </div>
+      <ReviewList limit={3} />
+      <p class="more"><a href="/reviews/">כל ההמלצות</a></p>
+    </div>
+  </section>
+
+  <section class="section section--blush">
+    <div class="wrap about">
+      <Picture src={owner.image} alt={owner.imageAlt} widths={[480, 720, 960]} sizes="(min-width: 900px) 40vw, 100vw" formats={['avif', 'webp']} loading="lazy" class="about-photo" />
+      <div>
+        <h2>{owner.name}</h2>
+        <p class="label">{owner.role}, {years} שנים בירושלים</p>
+        <p class="lead">{owner.story[2]}</p>
+        <p><a href="/about/">הסיפור של פרחי הגפן</a></p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap faq-grid">
+      <h2>שאלות שחוזרות</h2>
+      <div>
+        <FaqList items={homeFaq} />
+        <p class="more"><a href="/faq/">כל השאלות והתשובות</a></p>
+      </div>
+    </div>
+  </section>
+
+  <CtaBand />
+</BaseLayout>
+
+<style>
+  /* ---------- Hero: the photo is the page; labels mark the actual flowers in it ---------- */
+  .hero { position: relative; background: var(--c-grape-deep); color: #efe6ee; overflow: hidden; }
+  .photo-box { position: relative; aspect-ratio: 16 / 9; }
+  .photo-box :global(picture) { display: block; height: 100%; }
+  .photo-box :global(.hero-photo) { width: 100%; height: 100%; object-fit: cover; }
+  .photo-box::after {
+    content: ''; position: absolute; inset: 0; pointer-events: none;
+    background: linear-gradient(to bottom, transparent 70%, var(--c-grape-deep));
+  }
+  .specimens { list-style: none; padding: 0; position: absolute; inset: 0; z-index: 1; }
+  .specimens li { position: absolute; left: var(--x); top: var(--y); }
+  .specimens li::before {
+    content: ''; position: absolute; left: -5px; top: -5px; width: 10px; height: 10px; border-radius: 50%;
+    background: var(--c-tendril); box-shadow: 0 0 0 4px rgb(207 224 122 / 0.25);
+  }
+  .specimens a {
+    position: absolute; top: 14px; left: 0; transform: translateX(-50%);
+    display: grid; justify-items: center; white-space: nowrap; text-decoration: none; color: #fff;
+    padding: 0.3rem 0.6rem; background: rgb(20 8 22 / 0.72); border-top: 1px solid var(--c-tendril);
+  }
+  .specimens a:hover .he { text-decoration: underline; }
+  .specimens .he { font-size: 1rem; line-height: 1.3; }
+  .specimens .latin { font-size: 0.75rem; color: #d8c9d7; line-height: 1.3; }
+
+  .hero-text { position: relative; z-index: 2; display: grid; gap: var(--space-5); padding-block: var(--space-6) var(--space-8); justify-items: start; }
+  .hero h1 { color: #fff; max-width: 14ch; }
+  .hero .lead { color: #d8c9d7; max-width: 32rem; }
+
+  /* Phones: a 4:3 crop of the 16:9 photo, shifted 30% to the flowers. Labels are re-mapped to the crop:
+     visible width = 75% of the photo, hidden left part = 25% x 30% = 7.5%. */
+  @media (max-width: 699px) {
+    .photo-box { aspect-ratio: 4 / 3; }
+    .photo-box :global(.hero-photo) { object-position: 30% 50%; }
+    .specimens li { left: calc((var(--x) - 7.5%) / 0.75); }
+    .specimens .latin { display: none; }
+    .specimens a { top: 10px; padding: 0.2rem 0.5rem; }
+    .specimens .he { font-size: 0.9rem; }
+  }
+
+  /* Wide screens: the photo sits on the left 72% and melts into the grape background; the text takes the
+     right side. The photo box keeps the photo's 16:9 ratio, so the labels stay on their flowers. */
+  @media (min-width: 1100px) {
+    .hero { display: grid; align-items: center; min-height: calc(72vw * 9 / 16); }
+    .photo-box {
+      position: absolute; left: 0; top: 50%; translate: 0 -50%; width: 72%;
+      mask-image: linear-gradient(to left, transparent 0%, #000 24%), linear-gradient(to bottom, transparent 0%, #000 10%, #000 90%, transparent 100%);
+      mask-composite: intersect;
+      -webkit-mask-composite: source-in;
+    }
+    .photo-box::after { display: none; }
+    .hero-text { padding-block: var(--space-8); }
+    .hero-text > * { max-width: 30rem; }
+    .hero h1 { max-width: 11ch; }
+  }
+
+  /* ---------- Sections ---------- */
+  .bouquets { display: grid; gap: var(--space-5); }
+  @media (min-width: 640px) { .bouquets { grid-template-columns: 1fr 1fr; } }
+  @media (min-width: 1100px) { .bouquets { grid-template-columns: repeat(3, 1fr); } }
+  .more { margin-top: var(--space-6); }
+
+  .steps { list-style: none; padding: 0; display: grid; gap: var(--space-6); counter-reset: step; }
+  @media (min-width: 760px) { .steps { grid-template-columns: repeat(4, 1fr); } }
+  .steps li { counter-increment: step; border-top: 1px solid var(--c-grape); padding-top: var(--space-4); }
+  .steps li::before { content: counter(step); display: block; font-size: var(--step-3); line-height: 1; color: var(--c-vine); margin-bottom: var(--space-3); }
+  .steps h3 { margin-bottom: var(--space-2); }
+
+  .services { list-style: none; padding: 0; border-top: 1px solid var(--c-line); }
+  .services li { border-bottom: 1px solid var(--c-line); }
+  .services a {
+    display: grid; grid-template-columns: 72px 1fr; gap: 0.2rem var(--space-4); align-items: center;
+    padding-block: var(--space-4); text-decoration: none; color: var(--c-text);
+  }
+  .services :global(.thumb) { grid-row: span 3; width: 72px; height: 72px; object-fit: cover; }
+  .s-title { font-size: var(--step-2); color: var(--c-grape); line-height: 1.2; }
+  .s-short { color: var(--c-muted); font-size: 1rem; line-height: 1.5; }
+  .s-price { font-family: var(--font-sans); font-size: 0.9rem; color: var(--c-vine); font-weight: 500; }
+  .services a:hover .s-title { color: var(--c-vine); text-decoration: underline; text-decoration-thickness: 1px; }
+  @media (min-width: 900px) {
+    .services a { grid-template-columns: 120px 1.1fr 1.4fr auto; gap: var(--space-6); }
+    .services :global(.thumb) { grid-row: auto; width: 120px; height: 90px; }
+    .s-price { white-space: nowrap; }
+  }
+
+  .teaser { display: grid; gap: var(--space-6); align-items: end; }
+  @media (min-width: 900px) { .teaser { grid-template-columns: 1fr 1fr; gap: var(--space-8); } }
+  .palettes { list-style: none; padding: 0; display: grid; gap: 0.5rem; margin-top: var(--space-3); }
+  .palettes a {
+    display: flex; align-items: center; gap: var(--space-4); min-height: 52px; padding: 0.5rem 0.9rem;
+    color: #fff; text-decoration: none; border: 1px solid rgb(255 255 255 / 0.22); font-size: 1.1rem;
+  }
+  .palettes a:hover { border-color: var(--c-tendril); background: rgb(255 255 255 / 0.05); }
+  .swatches { display: flex; }
+  .swatches span { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--c-grape); }
+  .swatches span + span { margin-inline-start: -7px; }
+  .builder-teaser .label { color: #d8c9d7; }
+
+  .season { display: grid; gap: var(--space-6); }
+  .season h2 { margin-bottom: var(--space-4); }
+  .season .lead { margin-bottom: var(--space-4); }
+  @media (min-width: 900px) { .season { grid-template-columns: 1.1fr 1fr; gap: var(--space-8); align-items: center; } }
+
+  .areas { width: 100%; border-collapse: collapse; font-family: var(--font-sans); }
+  .areas th, .areas td { text-align: start; padding: 0.8rem 0; padding-inline-end: var(--space-4); border-bottom: 1px solid var(--c-line); font-weight: 400; }
+  .areas thead th { font-size: 0.85rem; color: var(--c-muted); }
+  .areas tbody th a { font-family: var(--font-serif); font-size: 1.25rem; color: var(--c-grape); }
+
+  .rating { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; font-family: var(--font-sans); }
+
+  .about { display: grid; gap: var(--space-6); align-items: center; }
+  .about :global(.about-photo) { width: 100%; aspect-ratio: 3 / 2; object-fit: cover; }
+  .about h2 { margin-bottom: var(--space-2); }
+  .about .label { margin-bottom: var(--space-4); }
+  .about .lead { color: var(--c-text); margin-bottom: var(--space-4); }
+  @media (min-width: 900px) { .about { grid-template-columns: 1fr 1fr; gap: var(--space-8); } }
+
+  .faq-grid { display: grid; gap: var(--space-6); }
+  @media (min-width: 900px) { .faq-grid { grid-template-columns: 1fr 2fr; gap: var(--space-8); } }
+</style>

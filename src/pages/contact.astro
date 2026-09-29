@@ -1,0 +1,77 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHead from '../components/PageHead.astro';
+import Icon from '../components/Icon.astro';
+import ContactForm from '../components/ContactForm.astro';
+import DeliveryStatus from '../components/DeliveryStatus.astro';
+import { contact, hours, deliveryRules } from '../config/site.config';
+import { breadcrumbSchema, home } from '../lib/schema';
+import { waLink, telLink } from '../lib/util';
+
+const crumbs = [home, { label: 'צור קשר', href: '/contact/' }];
+---
+<BaseLayout
+  title="צור קשר והזמנות"
+  description="הזמנת פרחים בוואטסאפ, בטלפון או בטופס. החנות בבקעה, ירושלים: שעות פתיחה, כתובת ואיסוף עצמי."
+  schema={[breadcrumbSchema(crumbs)]}
+>
+  <PageHead crumbs={crumbs} title="צור קשר" lead={`הדרך הכי מהירה היא וואטסאפ. ${contact.responsePromise}.`} />
+
+  <section class="section">
+    <div class="wrap grid">
+      <div class="ways">
+        <a class="way" href={waLink()} target="_blank" rel="noopener">
+          <Icon name="whatsapp" size={28} />
+          <span><strong>וואטסאפ</strong><span dir="ltr">{contact.phone}</span></span>
+        </a>
+        <a class="way" href={telLink}>
+          <Icon name="phone" size={26} />
+          <span><strong>טלפון</strong><span dir="ltr">{contact.phone}</span></span>
+        </a>
+        <a class="way" href={`mailto:${contact.email}`}>
+          <Icon name="mail" size={26} />
+          <span><strong>מייל</strong><span>{contact.email}</span></span>
+        </a>
+        <div class="way static">
+          <Icon name="store" size={26} />
+          <span><strong>החנות</strong><span>{contact.street}, {contact.neighborhood}, {contact.locality}</span></span>
+        </div>
+
+        <DeliveryStatus variant="card" />
+        <p class="small">{deliveryRules.pickupNote}</p>
+
+        <table class="hours">
+          <caption>שעות פתיחה</caption>
+          <tbody>
+            {hours.map((h) => <tr><th scope="row">{h.label}</th><td dir="ltr">{h.opens ? `${h.opens}-${h.closes}` : 'סגור'}</td></tr>)}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="form-box">
+        <h2>השאירו פרטים</h2>
+        <p class="small">לחתונות, למינויים ולכל מה שצריך שיחה. לזר מהיר עדיף וואטסאפ.</p>
+        <ContactForm id="contact" />
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .grid { display: grid; gap: var(--space-7); }
+  @media (min-width: 900px) { .grid { grid-template-columns: 1fr 1.2fr; gap: var(--space-8); align-items: start; } }
+  .ways { display: grid; gap: var(--space-3); }
+  .way { display: flex; align-items: center; gap: var(--space-4); padding: var(--space-4); border: 1px solid var(--c-line); background: #fff; text-decoration: none; color: var(--c-text); }
+  a.way:hover { border-color: var(--c-grape); }
+  .way :global(svg) { color: var(--c-vine); flex: none; }
+  .way > span { display: grid; font-family: var(--font-sans); line-height: 1.4; }
+  .way strong { font-family: var(--font-serif); font-size: 1.25rem; font-weight: 500; color: var(--c-grape); }
+  .ways :global([data-delivery-status]) { margin-top: var(--space-4); }
+  .small { font-family: var(--font-sans); font-size: 0.9rem; color: var(--c-muted); }
+  .hours { margin-top: var(--space-4); border-collapse: collapse; font-family: var(--font-sans); width: 100%; max-width: 22rem; }
+  .hours caption { text-align: start; font-family: var(--font-serif); font-size: var(--step-1); color: var(--c-grape); margin-bottom: var(--space-2); }
+  .hours th, .hours td { text-align: start; padding: 0.4rem 0; border-bottom: 1px solid var(--c-line); font-weight: 400; }
+  .form-box { background: #fff; border: 1px solid var(--c-line); padding: var(--space-6); }
+  .form-box h2 { font-size: var(--step-3); margin-bottom: var(--space-2); }
+  .form-box .small { margin-bottom: var(--space-5); }
+</style>

@@ -1,0 +1,43 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHead from '../components/PageHead.astro';
+import FaqList from '../components/FaqList.astro';
+import CtaBand from '../components/CtaBand.astro';
+import { faq, services } from '../config/site.config';
+import { breadcrumbSchema, faqSchema, home } from '../lib/schema';
+
+const crumbs = [home, { label: 'שאלות נפוצות', href: '/faq/' }];
+const all = [...faq, ...services.flatMap((s) => s.faq)];
+---
+<BaseLayout
+  title="שאלות נפוצות על הזמנת פרחים"
+  description="עד מתי אפשר להזמין לאותו יום, כמה עולה משלוח, כמה זמן זר מחזיק, איך מבטלים ומה שולחים לבית חולים. כל התשובות במקום אחד."
+  schema={[breadcrumbSchema(crumbs), faqSchema(all)]}
+>
+  <PageHead crumbs={crumbs} title="שאלות נפוצות" lead="לא מצאתם תשובה? כתבו לנו בוואטסאפ, ונענה בדרך כלל תוך שעה." />
+
+  <section class="section">
+    <div class="wrap groups">
+      <section class="group">
+        <h2>הזמנה ומשלוח</h2>
+        <FaqList items={faq} />
+      </section>
+      {services.map((s) => (
+        <section class="group">
+          <h2><a href={`/services/${s.slug}/`}>{s.title}</a></h2>
+          <FaqList items={s.faq} />
+        </section>
+      ))}
+    </div>
+  </section>
+
+  <CtaBand />
+</BaseLayout>
+
+<style>
+  .groups { display: grid; gap: var(--space-8); }
+  .group { display: grid; gap: var(--space-4); }
+  @media (min-width: 900px) { .group { grid-template-columns: 1fr 2fr; gap: var(--space-8); } }
+  .group h2 { font-size: var(--step-3); }
+  .group h2 a { color: inherit; }
+</style>
